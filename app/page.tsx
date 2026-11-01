@@ -62,10 +62,10 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-white font-sans text-[#36454F]">
-      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] px-4 py-3 sm:px-8"><div className="mx-auto flex max-w-[1440px] items-center gap-3"><a href="/" aria-label="Naslovnica" className="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a><a href="/" className="text-xl font-bold tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a></div></header>
+      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] px-3 py-3 sm:px-8"><div className="mx-auto flex max-w-[1440px] items-center gap-2 sm:gap-3"><a href="/" aria-label="Naslovnica" className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white sm:h-14 sm:w-14"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a><a href="/" className="text-[1.35rem] font-extrabold tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a></div></header>
       <nav className="border-b border-gray-200 bg-white py-3">
-        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 text-center text-xs font-bold uppercase tracking-[0.12em] text-[#001F3F] sm:gap-x-8 sm:px-8 sm:text-sm sm:tracking-widest">
-          <a href="/">Naslovnica</a><a href="#najnovije">Najnovije vijesti</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
+        <div className="mx-auto flex max-w-[1280px] snap-x snap-mandatory items-center justify-start gap-7 overflow-x-auto overscroll-x-contain whitespace-nowrap px-4 text-xs font-bold uppercase tracking-[0.12em] text-[#001F3F] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-center sm:gap-8 sm:px-8 sm:text-sm sm:tracking-widest">
+          <a className="shrink-0 snap-start py-2" href="/">Naslovnica</a><a className="shrink-0 snap-start py-2" href="#najnovije">Najnovije vijesti</a><a className="shrink-0 snap-start py-2" href="#rang-lista">Digitalac Rang Lista</a><a className="shrink-0 snap-start py-2" href="#najnovije">Analize</a>
         </div>
       </nav>
       <div className="mx-auto mt-6 grid w-full max-w-[1440px] grid-cols-1 gap-8 px-4 sm:mt-8 sm:px-6 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
