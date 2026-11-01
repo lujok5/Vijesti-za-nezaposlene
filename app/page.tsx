@@ -1,111 +1,110 @@
-﻿import fs from "fs";
+import fs from "fs";
 import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
-function ucitajVijesti() {
+type Article = {
+  id?: string;
+  influencer: string;
+  title?: string;
+  naslov?: string;
+  body?: string;
+  tekst?: string;
+  category?: string;
+  kategorija?: string;
+  image_url?: string | null;
+};
+
+function loadLocalNews(): Article[] {
   try {
-    const filePath = path.join(process.cwd(), "vijesti.json");
-    if (!fs.existsSync(filePath)) return [];
-    const jsonData = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(jsonData);
-  } catch (error) {
+    const file = path.join(process.cwd(), "vijesti.json");
+    return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf-8")) as Article[]) : [];
+  } catch {
     return [];
   }
 }
 
-export default function Page() {
-  const vijesti = ucitajVijesti();
-  const glavnaVijest = vijesti[0] || {
-    influencer: "Marko Jack",
-    naslov: "Marko Jack opet probio dno?",
-    tekst: "Analiza najnovijeg TikTok gafa koji je obilježio 2026. godinu.",
-    kategorija: "TikTok Drama"
-  };
-  const sporedneVijesti = vijesti.slice(1);
+async function loadNews(): Promise<Article[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (url && key) {
+    try {
+      const supabase = createClient(url, key, { auth: { persistSession: false } });
+      const { data, error } = await supabase.from("news")
+        .select("id,influencer,title,body,category,image_url")
+        .eq("published", true).order("created_at", { ascending: false });
+      if (!error && data?.length) return data as Article[];
+    } catch {
+      // Keep the site available using the bundled news if Supabase is unavailable.
+    }
+  }
+  return loadLocalNews();
+}
 
-  // Rang lista digitalaca
-  const rangLista = [
-    { ime: "Marko Jack", score: "99.8% šuplje", status: "Snima iz auta" },
-    { ime: "Baka Prase", score: "95.2% dramatično", status: "Kupuje novi sat" },
-    { ime: "Mihajlo Madić", score: "91.0% motivacija", status: "Dijeli savjete o uspjehu" },
-    { ime: "Vanjorek obitelj", score: "88.5% obiteljski kaos", status: "Live uključivanje" },
-    { ime: "Goldenito", score: "85.0% fleksanje", status: "Gleda u kameru" }
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const items = (await loadNews()).map((item) => ({
+    ...item,
+    title: item.title ?? item.naslov ?? "",
+    body: item.body ?? item.tekst ?? "",
+    category: item.category ?? item.kategorija ?? "",
+  }));
+  const featured = items[0] ?? {
+    influencer: "Vijesti za nezaposlene",
+    title: "Dobro došli na portal",
+    body: "Najnovije vijesti i analize iz digitalnog svijeta.",
+    category: "Naslovnica",
+  };
+  const ranking = [
+    { name: "Marko Jack", score: "99.8% šuplje", status: "Snima iz auta" },
+    { name: "Baka Prase", score: "95.2% dramatično", status: "Kupuje novi sat" },
+    { name: "Mihajlo Madić", score: "91.0% motivacija", status: "Dijeli savjete o uspjehu" },
+    { name: "Vanjorek obitelj", score: "88.5% obiteljski kaos", status: "Live uključivanje" },
+    { name: "Goldenito", score: "85.0% fleksanje", status: "Gleda u kameru" },
   ];
 
   return (
-    <main className="min-h-screen bg-white text-[#36454F] font-sans">
-      <header className="bg-[#001F3F] p-6 text-white text-center font-bold text-3xl tracking-tight border-b-4 border-[#FF8C00]">
-        VIJESTI ZA NEZAPOSLENE
-      </header>
-      
-      <nav className="bg-white border-b border-gray-200 py-3">
-        <div className="max-w-[1280px] mx-auto px-8 flex gap-8 text-sm font-bold text-[#001F3F] uppercase tracking-widest">
-          <span className="border-b-2 border-[#FF8C00] cursor-pointer">Naslovnica</span>
-          <span className="hover:text-[#FF8C00] cursor-pointer transition">TikTok Drama</span>
-          <span className="hover:text-[#FF8C00] cursor-pointer transition">Digitalac Rang Lista</span>
-          <span className="hover:text-[#FF8C00] cursor-pointer transition">Analize</span>
+    <main className="min-h-screen bg-white font-sans text-[#36454F]">
+      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] p-6 text-center text-3xl font-bold tracking-tight text-white">VIJESTI ZA NEZAPOSLENE</header>
+      <nav className="border-b border-gray-200 bg-white py-3">
+        <div className="mx-auto flex max-w-[1280px] gap-8 px-8 text-sm font-bold uppercase tracking-widest text-[#001F3F]">
+          <a href="/">Naslovnica</a><a href="#najnovije">TikTok Drama</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
         </div>
       </nav>
-
-      <main className="max-w-[1280px] mx-auto p-8 mt-12">
-        {/* Glavna vijest */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center border-b pb-16">
+      <div className="mx-auto mt-12 max-w-[1280px] p-8">
+        <section className="grid grid-cols-1 items-center gap-16 border-b pb-16 md:grid-cols-2">
           <div>
-            <span className="bg-[#CC0000] text-white text-xs font-bold px-2 py-1 uppercase mb-4 inline-block">{glavnaVijest.kategorija}</span>
-            <h1 className="text-4xl md:text-5xl font-bold text-[#001F3F] leading-tight mb-6">{glavnaVijest.naslov}</h1>
-            <p className="text-xl leading-relaxed mb-8">{glavnaVijest.tekst}</p>
-            <div className="flex gap-4">
-              <button className="bg-[#FF8C00] text-white px-8 py-4 rounded-sm font-bold shadow-lg hover:brightness-110 transition">PROČITAJ ANALIZU</button>
-            </div>
+            <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
+            <h1 className="mb-6 text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
+            <p className="mb-8 text-xl leading-relaxed">{featured.body}</p>
+            <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">PROČITAJ ANALIZU</a>
           </div>
-          <div className="bg-gray-100 border-2 border-dashed border-gray-300 h-[400px] flex flex-col items-center justify-center relative overflow-hidden rounded-lg">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#001F3F]/10 to-transparent"></div>
-            <p className="text-gray-400 font-bold uppercase tracking-tighter text-3xl opacity-20">{glavnaVijest.influencer}</p>
-            <div className="z-10 text-center p-6">
-              <div className="w-20 h-1 bg-[#FF8C00] mx-auto mb-4"></div>
-              <p className="text-[#001F3F] font-medium italic">"Uživo sa TikToka – dok ti tražiš posao."</p>
-            </div>
+          <div className="relative flex h-[400px] items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-gray-300 bg-gray-100">
+            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" /> : <p className="text-3xl font-bold uppercase text-gray-400">{featured.influencer}</p>}
+            <div className="z-10 bg-white/85 p-6 text-center"><div className="mx-auto mb-4 h-1 w-20 bg-[#FF8C00]" /><p className="italic text-[#001F3F]">"Uživo sa TikToka – dok ti tražiš posao."</p></div>
           </div>
         </section>
-
-        {/* Digitalac Rang Lista i Ostale vijesti */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mt-20">
-          <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-[#001F3F] border-l-8 border-[#FF8C00] pl-4 mb-8">NAJNOVIJE VIJESTI S MREŽA</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {sporedneVijesti.map((v, index) => (
-                <div key={index} className="border border-gray-200 shadow-sm hover:shadow-xl transition p-6 rounded-md bg-white">
-                  <span className="text-[#FF8C00] text-xs font-bold uppercase">{v.kategorija}</span>
-                  <h3 className="text-lg font-bold text-[#001F3F] mt-2 mb-3">{v.naslov}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{v.tekst}</p>
-                </div>
-              ))}
+        <div className="mt-20 grid grid-cols-1 gap-12 lg:grid-cols-3">
+          <section id="najnovije" className="lg:col-span-2">
+            <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {items.slice(1).map((item, index) => <article key={item.id ?? index} className="overflow-hidden rounded border border-gray-200 shadow-sm">
+                {item.image_url && <img src={item.image_url} alt={item.title} className="h-48 w-full object-cover" />}
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p></div>
+              </article>)}
             </div>
-          </div>
-
-          {/* Sidebar - Digitalac Rang Lista */}
-          <aside className="bg-gray-50 border border-gray-200 p-6 rounded-lg">
-            <h3 className="text-xl font-bold text-[#001F3F] mb-6 border-b pb-3 flex items-center justify-between">
-              <span>Digitalac Rang Lista</span>
-              <span className="text-xs bg-[#CC0000] text-white px-2 py-1 rounded">TOP LISTA</span>
-            </h3>
-            <div className="space-y-4">
-              {rangLista.map((item, idx) => (
-                <div key={idx} className="bg-white p-4 rounded border border-gray-200 flex items-center justify-between shadow-sm">
-                  <div>
-                    <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
-                    <h4 className="font-bold text-[#001F3F]">{item.ime}</h4>
-                    <p className="text-xs text-gray-500">{item.status}</p>
-                  </div>
-                  <span className="text-sm font-bold text-[#FF8C00]">{item.score}</span>
-                </div>
-              ))}
-            </div>
+          </section>
+          <aside id="rang-lista" className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+            <h3 className="mb-6 border-b pb-3 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
+            <div className="space-y-4">{ranking.map((item, index) => <div key={item.name} className="flex items-center justify-between rounded border bg-white p-4">
+              <div><span className="text-xs text-gray-400">#{index + 1}</span><h4 className="font-bold text-[#001F3F]">{item.name}</h4><p className="text-xs text-gray-500">{item.status}</p></div><span className="text-sm font-bold text-[#FF8C00]">{item.score}</span>
+            </div>)}</div>
           </aside>
         </div>
-      </main>
-
-      <footer className="bg-[#001F3F] text-white mt-32 p-12 text-center text-sm opacity-90">
-        <p>&copy; 2026 VIJESTI ZA NEZAPOSLENE - Sva prava pridržana onima koji nemaju pametnijeg posla.</p>
+      </div>
+      <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">
+        <p>© 2026 VIJESTI ZA NEZAPOSLENE - Sva prava pridržana onima koji nemaju pametnijeg posla.</p>
+        <a href="/admin" className="mt-3 inline-block text-white/60 hover:text-white">Uredništvo</a>
       </footer>
     </main>
   );
