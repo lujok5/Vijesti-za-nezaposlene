@@ -62,7 +62,7 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-white font-sans text-[#36454F]">
-      <header className="flex justify-center border-b-4 border-[#FF8C00] bg-[#001F3F] px-4 py-2"><a href="/" aria-label="Vijesti za nezaposlene — naslovnica"><img src="/logo-vijesti.png" alt="Vijesti za nezaposlene" className="h-24 w-24 object-contain sm:h-32 sm:w-32" /></a></header>
+      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] px-4 py-3 sm:px-8"><div className="mx-auto flex max-w-[1440px] items-center gap-3"><a href="/" aria-label="Naslovnica" className="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a><a href="/" className="text-xl font-bold tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a></div></header>
       <nav className="border-b border-gray-200 bg-white py-3">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 text-center text-xs font-bold uppercase tracking-[0.12em] text-[#001F3F] sm:gap-x-8 sm:px-8 sm:text-sm sm:tracking-widest">
           <a href="/">Naslovnica</a><a href="#najnovije">Najnovije vijesti</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
