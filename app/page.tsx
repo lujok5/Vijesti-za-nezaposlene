@@ -69,17 +69,17 @@ export default async function Page() {
       </nav>
       <div className="mx-auto mt-8 grid max-w-[1440px] grid-cols-1 gap-8 px-5 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
         <div className="min-w-0">
-        <section className="grid grid-cols-1 items-center gap-8 border-b pb-10 md:grid-cols-2">
+        <section className="border-b pb-10">
           <div>
             <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
-            <h1 className="mb-6 text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
-            <p className="mb-3 text-xl leading-relaxed">{featured.body}</p>
-            {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-8 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
-            {featured.source_url ? <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI IZVOR ↗</a> : <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}
+            <h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
           </div>
-          <div className="relative mx-auto flex aspect-square w-full max-w-[320px] items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="h-full w-full object-contain" /> : <p className="px-8 text-center text-xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
+          <div className="relative mb-6 flex min-h-64 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 md:min-h-[420px]">
+            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" /> : <p className="px-8 py-24 text-center text-xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
+          <p className="mb-3 max-w-5xl text-lg leading-relaxed">{featured.body}</p>
+          {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-5 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
+          <div>{featured.source_url ? <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI IZVOR ↗</a> : <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}</div>
         </section>
         <div className="mt-10">
           <section id="najnovije">
