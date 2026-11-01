@@ -96,15 +96,15 @@ export default async function Page() {
               </article>)}
             </div>
           </section>
-          <aside id="rang-lista" className="h-fit rounded-lg border border-gray-200 bg-gray-50 p-6 lg:sticky lg:top-6">
+        </div>
+        </div>
+        <aside id="rang-lista" className="h-fit rounded-lg border border-gray-200 bg-gray-50 p-6 lg:sticky lg:top-6">
             <h3 className="mb-2 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
             <p className="mb-5 text-sm text-gray-600">Početni poredak</p>
             <ol className="space-y-3">
               {["Marko Jack", "Mihajlo Madić", "Ellen Vanjorek", "Vanjorek obitelj", "Marko Filipović", "Goldenito", "Barbi Afrika", "Choda", "Mudja", "Baka Prase"].map((name, index) => <li key={name} className="flex items-center gap-4 rounded border bg-white p-4"><span className="w-8 text-xl font-black text-[#FF8C00]">#{index + 1}</span><span className="font-bold text-[#001F3F]">{name}</span></li>)}
             </ol>
-          </aside>
-        </div>
-        </div>
+        </aside>
       </div>
       <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">
         <p>© 2026 VIJESTI ZA NEZAPOSLENE - Sva prava pridržana onima koji nemaju pametnijeg posla.</p>
