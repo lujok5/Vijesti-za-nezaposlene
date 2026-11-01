@@ -67,8 +67,9 @@ export default async function Page() {
           <a href="/">Naslovnica</a><a href="#najnovije">Najnovije vijesti</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
         </div>
       </nav>
-      <div className="mx-auto mt-12 max-w-[1280px] p-8">
-        <section className="grid grid-cols-1 items-center gap-16 border-b pb-16 md:grid-cols-2">
+      <div className="mx-auto mt-8 grid max-w-[1440px] grid-cols-1 gap-8 px-5 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
+        <div className="min-w-0">
+        <section className="grid grid-cols-1 items-center gap-8 border-b pb-10 md:grid-cols-2">
           <div>
             <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
             <h1 className="mb-6 text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
@@ -80,8 +81,8 @@ export default async function Page() {
             {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" /> : <p className="px-8 text-center text-2xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
         </section>
-        <div className="mt-20 grid grid-cols-1 gap-12">
-          <section id="najnovije" className="lg:col-span-2">
+        <div className="mt-10">
+          <section id="najnovije">
             <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {items.slice(0, 1).map((item, index) => <article key={item.id ?? `featured-${index}`} className="overflow-hidden rounded border border-gray-200 shadow-sm">
@@ -95,13 +96,14 @@ export default async function Page() {
               </article>)}
             </div>
           </section>
-          <aside id="rang-lista" className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+          <aside id="rang-lista" className="h-fit rounded-lg border border-gray-200 bg-gray-50 p-6 lg:sticky lg:top-6">
             <h3 className="mb-2 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
             <p className="mb-5 text-sm text-gray-600">Početni poredak</p>
             <ol className="space-y-3">
               {["Marko Jack", "Mihajlo Madić", "Ellen Vanjorek", "Vanjorek obitelj", "Marko Filipović", "Goldenito", "Barbi Afrika", "Choda", "Mudja", "Baka Prase"].map((name, index) => <li key={name} className="flex items-center gap-4 rounded border bg-white p-4"><span className="w-8 text-xl font-black text-[#FF8C00]">#{index + 1}</span><span className="font-bold text-[#001F3F]">{name}</span></li>)}
             </ol>
           </aside>
+        </div>
         </div>
       </div>
       <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">
