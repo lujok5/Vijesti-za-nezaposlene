@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [body, setBody] = useState("");
+  const [tiktokUrl, setTiktokUrl] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -60,6 +61,14 @@ export default function AdminPage() {
     setBusy(true); setMessage("");
     let path: string | null = null;
     try {
+      let validatedTikTokUrl: string | null = null;
+      if (tiktokUrl.trim()) {
+        const parsedUrl = new URL(tiktokUrl.trim());
+        if (parsedUrl.protocol !== "https:" || !["tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(parsedUrl.hostname.toLowerCase())) {
+          throw new Error("Unesi valjanu HTTPS poveznicu na TikTok video.");
+        }
+        validatedTikTokUrl = parsedUrl.toString();
+      }
       let imageUrl: string | null = null;
       if (image) {
         const types: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
@@ -73,10 +82,11 @@ export default function AdminPage() {
       }
       const saved = await db.from("news").insert({
         created_by: user.id, influencer: source.trim(), title: title.trim(),
-        category: category.trim(), body: body.trim(), image_url: imageUrl, image_path: path, published: true,
+        category: category.trim(), body: body.trim(), image_url: imageUrl, image_path: path,
+        source_name: validatedTikTokUrl ? "TikTok" : null, source_url: validatedTikTokUrl, published: true,
       });
       if (saved.error) throw saved.error;
-      setSource(""); setTitle(""); setCategory(""); setBody(""); setImage(null);
+      setSource(""); setTitle(""); setCategory(""); setBody(""); setImage(null); setTiktokUrl("");
       const input = document.getElementById("story-image") as HTMLInputElement | null;
       if (input) input.value = "";
       setMessage("Vijest je objavljena.");
@@ -116,6 +126,7 @@ export default function AdminPage() {
           <label className="block text-sm">Naslov<input required maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">Kategorija<input required maxLength={80} value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">Tekst vijesti<textarea required maxLength={10000} rows={7} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
+          <label className="block text-sm">TikTok poveznica (opcionalno)<input type="url" maxLength={2000} placeholder="https://www.tiktok.com/@korisnik/video/..." value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} className="mt-1 w-full rounded border p-2" /><span className="mt-1 block text-xs text-gray-500">Zalijepi poveznicu na video. Prepričaj događaj u tekstu vijesti; bot ne može automatski pročitati svaki TikTok video.</span></label>
           <label className="block text-sm">Slika (JPG, PNG, WebP ili GIF; do 5 MB)<input id="story-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImage(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm" /></label>
           <button disabled={busy} className="rounded bg-[#FF8C00] px-5 py-3 font-bold text-white">{busy ? "Spremam..." : "Objavi vijest"}</button>
         </form>
