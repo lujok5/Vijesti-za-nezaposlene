@@ -21,6 +21,7 @@ create table public.news (
   source_url text,
   published_at timestamptz,
   is_automated boolean not null default false,
+  is_featured boolean not null default false,
   published boolean not null default true,
   created_at timestamptz not null default now()
 );
