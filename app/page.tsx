@@ -62,25 +62,25 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-white font-sans text-[#36454F]">
-      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] p-6 text-center text-3xl font-bold tracking-tight text-white">VIJESTI ZA NEZAPOSLENE</header>
+      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] px-4 py-5 text-center text-2xl font-bold tracking-tight text-white sm:p-6 sm:text-3xl">VIJESTI ZA NEZAPOSLENE</header>
       <nav className="border-b border-gray-200 bg-white py-3">
-        <div className="mx-auto flex max-w-[1280px] gap-8 px-8 text-sm font-bold uppercase tracking-widest text-[#001F3F]">
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 text-center text-xs font-bold uppercase tracking-[0.12em] text-[#001F3F] sm:gap-x-8 sm:px-8 sm:text-sm sm:tracking-widest">
           <a href="/">Naslovnica</a><a href="#najnovije">Najnovije vijesti</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
         </div>
       </nav>
-      <div className="mx-auto mt-8 grid max-w-[1440px] grid-cols-1 gap-8 px-5 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
+      <div className="mx-auto mt-6 grid w-full max-w-[1440px] grid-cols-1 gap-8 px-4 sm:mt-8 sm:px-6 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
         <div className="min-w-0">
         <section className="border-b pb-10">
           <div>
             <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
-            {featured.id ? <a href={`/vijest/${featured.id}`} className="block"><h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] hover:text-[#FF8C00] md:text-5xl">{featured.title}</h1></a> : <h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>}
+            {featured.id ? <a href={`/vijest/${featured.id}`} className="block"><h1 className="mb-5 max-w-5xl break-words text-3xl font-bold leading-tight text-[#001F3F] hover:text-[#FF8C00] sm:text-4xl md:mb-6 md:text-5xl">{featured.title}</h1></a> : <h1 className="mb-5 max-w-5xl break-words text-3xl font-bold leading-tight text-[#001F3F] sm:text-4xl md:mb-6 md:text-5xl">{featured.title}</h1>}
           </div>
-          <div className="relative mb-6 flex min-h-64 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 md:min-h-[420px]">
-            {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex h-full w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" />) : <p className="px-8 py-24 text-center text-xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
+          <div className="relative mb-5 flex min-h-0 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:mb-6 md:min-h-[420px]">
+            {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" />) : <p className="px-6 py-16 text-center text-lg font-bold uppercase text-gray-400 sm:px-8 sm:py-24 sm:text-xl">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
-          <p className="mb-3 max-w-5xl text-lg leading-relaxed">{featured.body}</p>
+          <p className="mb-3 max-w-5xl text-base leading-7 sm:text-lg sm:leading-relaxed">{featured.body}</p>
           {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-5 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
-          <div className="flex flex-wrap gap-3">{featured.id && <a href={`/vijest/${featured.id}`} className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI VIJEST I KOMENTIRAJ →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block border border-[#FF8C00] px-8 py-4 font-bold text-[#FF8C00]">OTVORI IZVOR ↗</a>}{!featured.id && <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}</div>
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap">{featured.id && <a href={`/vijest/${featured.id}`} className="inline-block px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base bg-[#FF8C00]">OTVORI VIJEST I KOMENTIRAJ →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block border border-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-[#FF8C00] sm:px-8 sm:py-4 sm:text-base">OTVORI IZVOR ↗</a>}{!featured.id && <a href="#najnovije" className="inline-block bg-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base">POGLEDAJ VIJESTI</a>}</div>
         </section>
         <div className="mt-10">
           <section id="najnovije">
