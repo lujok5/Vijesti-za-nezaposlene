@@ -73,14 +73,14 @@ export default async function Page() {
         <section className="border-b pb-10">
           <div>
             <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
-            <h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
+            {featured.id ? <a href={`/vijest/${featured.id}`} className="block"><h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] hover:text-[#FF8C00] md:text-5xl">{featured.title}</h1></a> : <h1 className="mb-6 max-w-5xl text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>}
           </div>
           <div className="relative mb-6 flex min-h-64 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 md:min-h-[420px]">
-            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" /> : <p className="px-8 py-24 text-center text-xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
+            {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex h-full w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" />) : <p className="px-8 py-24 text-center text-xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
           <p className="mb-3 max-w-5xl text-lg leading-relaxed">{featured.body}</p>
           {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-5 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
-          <div>{featured.source_url ? <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI IZVOR ↗</a> : <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}</div>
+          <div className="flex flex-wrap gap-3">{featured.id && <a href={`/vijest/${featured.id}`} className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI VIJEST I KOMENTIRAJ →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block border border-[#FF8C00] px-8 py-4 font-bold text-[#FF8C00]">OTVORI IZVOR ↗</a>}{!featured.id && <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}</div>
         </section>
         <div className="mt-10">
           <section id="najnovije">
