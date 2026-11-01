@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 
-type Story = { id: string; title: string; category: string; image_path: string | null };
+type Story = { id: string; influencer: string; title: string; category: string; body: string; image_path: string | null; source_url: string | null; source_name: string | null };
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -22,6 +22,7 @@ export default function AdminPage() {
   const [context, setContext] = useState("");
   const [satire, setSatire] = useState(false);
   const [image, setImage] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -42,7 +43,7 @@ export default function AdminPage() {
       if (cancelled) return;
       setEditor(Boolean(access));
       if (!access) { setMessage("Ovaj račun nema uredničke ovlasti."); return; }
-      const { data } = await db.from("news").select("id,title,category,image_path").eq("published", true).order("created_at", { ascending: false });
+      const { data } = await db.from("news").select("id,influencer,title,category,body,image_path,source_url,source_name").eq("published", true).order("created_at", { ascending: false });
       if (!cancelled) setStories((data ?? []) as Story[]);
     })();
     return () => { cancelled = true; };
@@ -106,22 +107,38 @@ export default function AdminPage() {
         if (uploaded.error) throw uploaded.error;
         imageUrl = db.storage.from("news-images").getPublicUrl(path).data.publicUrl;
       }
-      const saved = await db.from("news").insert({
-        created_by: user.id, influencer: source.trim(), title: title.trim(),
+      const article = { influencer: source.trim(), title: title.trim(),
         category: category.trim(), body: body.trim(), image_url: imageUrl, image_path: path,
         source_name: validatedTikTokUrl ? "TikTok" : null, source_url: validatedTikTokUrl, published: true,
-      });
+      };
+      const saved = editingId
+        ? await db.from("news").update({ ...article, ...(imageUrl ? {} : { image_url: undefined, image_path: undefined }) }).eq("id", editingId)
+        : await db.from("news").insert({ ...article, created_by: user.id });
       if (saved.error) throw saved.error;
-      setSource(""); setTitle(""); setCategory(""); setBody(""); setImage(null); setTiktokUrl("");
+      setSource(""); setTitle(""); setCategory(""); setBody(""); setImage(null); setTiktokUrl(""); setEditingId(null);
       const input = document.getElementById("story-image") as HTMLInputElement | null;
       if (input) input.value = "";
-      setMessage("Vijest je objavljena.");
-      const { data } = await db.from("news").select("id,title,category,image_path").eq("published", true).order("created_at", { ascending: false });
+      setMessage(editingId ? "Vijest je ažurirana." : "Vijest je objavljena.");
+      const { data } = await db.from("news").select("id,influencer,title,category,body,image_path,source_url,source_name").eq("published", true).order("created_at", { ascending: false });
       setStories((data ?? []) as Story[]);
     } catch (error) {
       if (path) await db.storage.from("news-images").remove([path]);
       setMessage(error instanceof Error ? error.message : "Vijest nije spremljena.");
     } finally { setBusy(false); }
+  }
+
+  function edit(story: Story) {
+    setEditingId(story.id); setSource(story.influencer); setTitle(story.title); setCategory(story.category);
+    setBody(story.body); setTiktokUrl(story.source_name === "TikTok" ? story.source_url ?? "" : "");
+    setImage(null); setMessage("Uređuješ postojeću vijest. Dodaj sliku ili izmijeni tekst pa spremi promjene.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelEdit() {
+    setEditingId(null); setSource(""); setTitle(""); setCategory(""); setBody(""); setTiktokUrl(""); setImage(null);
+    const input = document.getElementById("story-image") as HTMLInputElement | null;
+    if (input) input.value = "";
+    setMessage("");
   }
 
   async function remove(story: Story) {
@@ -157,10 +174,11 @@ export default function AdminPage() {
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={satire} onChange={(e) => setSatire(e.target.checked)} />Satira (AI će jasno označiti da je priča izmišljena)</label>
           <button type="button" disabled={busy || (!tiktokUrl.trim() && !context.trim())} onClick={() => void makeDraft()} className="rounded border border-[#001F3F] px-5 py-3 font-bold text-[#001F3F]">{busy ? "Radim nacrt..." : "Napiši nacrt pomoću AI-ja"}</button>
           <label className="block text-sm">Slika (JPG, PNG, WebP ili GIF; do 5 MB)<input id="story-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImage(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm" /></label>
-          <button disabled={busy} className="rounded bg-[#FF8C00] px-5 py-3 font-bold text-white">{busy ? "Spremam..." : "Objavi vijest"}</button>
+          <button disabled={busy} className="rounded bg-[#FF8C00] px-5 py-3 font-bold text-white">{busy ? "Spremam..." : editingId ? "Spremi promjene" : "Objavi vijest"}</button>
+          {editingId && <button type="button" onClick={cancelEdit} className="ml-2 rounded border px-5 py-3">Odustani</button>}
         </form>
         <section><h2 className="mb-4 text-lg font-bold text-[#001F3F]">Objavljene vijesti</h2>
-          {stories.length === 0 ? <p className="text-sm text-gray-500">Još nema vijesti.</p> : <ul className="space-y-3">{stories.map((story) => <li key={story.id} className="flex justify-between gap-3 rounded border p-3"><div><p className="text-xs font-bold uppercase text-[#FF8C00]">{story.category}</p><p className="mt-1 font-semibold text-[#001F3F]">{story.title}</p></div><button onClick={() => void remove(story)} className="text-sm text-red-700">Obriši</button></li>)}</ul>}
+          {stories.length === 0 ? <p className="text-sm text-gray-500">Još nema vijesti.</p> : <ul className="space-y-3">{stories.map((story) => <li key={story.id} className="flex justify-between gap-3 rounded border p-3"><div><p className="text-xs font-bold uppercase text-[#FF8C00]">{story.category}</p><p className="mt-1 font-semibold text-[#001F3F]">{story.title}</p></div><div className="flex gap-3"><button onClick={() => edit(story)} className="text-sm font-semibold text-[#001F3F]">Uredi</button><button onClick={() => void remove(story)} className="text-sm text-red-700">Obriši</button></div></li>)}</ul>}
         </section>
       </div> : user ? <p className="text-sm text-gray-600">Prijavljen si, ali račun nema uredničke ovlasti.</p> : null}
     </section>
