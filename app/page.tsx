@@ -86,13 +86,13 @@ export default async function Page() {
             <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {items.slice(0, 1).map((item, index) => <article key={item.id ?? `featured-${index}`} className="overflow-hidden rounded border border-gray-200 shadow-sm">
-                {item.image_url && <div className="aspect-square w-full bg-gray-50"><img src={item.image_url} alt={item.title} className="h-full w-full object-contain" /></div>}
-                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p>{item.source_url && <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-xs font-semibold text-[#FF8C00]">Izvor: {item.source_name ?? "otvori članak"} ↗</a>}</div>
+                {item.image_url && <a href={`/vijest/${item.id}`} className="block aspect-square w-full bg-gray-100"><img src={item.image_url} alt={item.title} className="h-full w-full object-cover" /></a>}
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><a href={`/vijest/${item.id}`} className="block"><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3></a><p className="text-sm leading-relaxed text-gray-600">{item.body}</p><a href={`/vijest/${item.id}`} className="mt-4 inline-block text-sm font-bold text-[#FF8C00]">Pročitaj vijest i komentiraj →</a></div>
               </article>)}
               {items.length <= 1 && <p className="rounded border border-gray-200 bg-gray-50 p-6 text-gray-600">Još nema novih vijesti iz pouzdanih izvora. Ne prikazujemo izmišljene ni probne članke.</p>}
               {items.slice(1).map((item, index) => <article key={item.id ?? index} className="overflow-hidden rounded border border-gray-200 shadow-sm">
-                {item.image_url && <div className="aspect-square w-full bg-gray-50"><img src={item.image_url} alt={item.title} className="h-full w-full object-contain" /></div>}
-                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p>{item.source_url && <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-xs font-semibold text-[#FF8C00]">Izvor: {item.source_name ?? "otvori članak"} ↗</a>}</div>
+                {item.image_url && <a href={`/vijest/${item.id}`} className="block aspect-square w-full bg-gray-100"><img src={item.image_url} alt={item.title} className="h-full w-full object-cover" /></a>}
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><a href={`/vijest/${item.id}`} className="block"><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3></a><p className="text-sm leading-relaxed text-gray-600">{item.body}</p><a href={`/vijest/${item.id}`} className="mt-4 inline-block text-sm font-bold text-[#FF8C00]">Pročitaj vijest i komentiraj →</a></div>
               </article>)}
             </div>
           </section>

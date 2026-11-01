@@ -46,3 +46,17 @@ create policy "Editors can delete news images" on storage.objects
 for delete to authenticated using (bucket_id='news-images' and exists (select 1 from public.admin_users where user_id=(select auth.uid())));
 create index if not exists news_created_by_idx on public.news (created_by);
 create unique index if not exists news_source_url_unique on public.news (source_url);
+
+create table if not exists public.comments (
+  id uuid primary key default gen_random_uuid(),
+  news_id uuid not null references public.news(id) on delete cascade,
+  display_name text not null default 'Anonimno' check (char_length(display_name) between 1 and 40),
+  body text not null check (char_length(body) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+alter table public.comments enable row level security;
+grant select, insert on public.comments to anon, authenticated;
+create policy "Public can read comments" on public.comments for select to anon, authenticated using (true);
+create policy "Anyone can post comments" on public.comments for insert to anon, authenticated
+with check (char_length(body) between 1 and 1000 and char_length(display_name) between 1 and 40);
+create index if not exists comments_news_created_idx on public.comments (news_id, created_at);
