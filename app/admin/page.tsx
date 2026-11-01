@@ -39,7 +39,7 @@ export default function AdminPage() {
       if (cancelled) return;
       setEditor(Boolean(access));
       if (!access) { setMessage("Ovaj račun nema uredničke ovlasti."); return; }
-      const { data } = await db.from("news").select("id,title,category,image_path").order("created_at", { ascending: false });
+      const { data } = await db.from("news").select("id,title,category,image_path").eq("published", true).order("created_at", { ascending: false });
       if (!cancelled) setStories((data ?? []) as Story[]);
     })();
     return () => { cancelled = true; };
@@ -80,7 +80,7 @@ export default function AdminPage() {
       const input = document.getElementById("story-image") as HTMLInputElement | null;
       if (input) input.value = "";
       setMessage("Vijest je objavljena.");
-      const { data } = await db.from("news").select("id,title,category,image_path").order("created_at", { ascending: false });
+      const { data } = await db.from("news").select("id,title,category,image_path").eq("published", true).order("created_at", { ascending: false });
       setStories((data ?? []) as Story[]);
     } catch (error) {
       if (path) await db.storage.from("news-images").remove([path]);

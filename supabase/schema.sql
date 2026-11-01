@@ -17,6 +17,10 @@ create table public.news (
   category text not null,
   image_url text,
   image_path text,
+  source_name text,
+  source_url text,
+  published_at timestamptz,
+  is_automated boolean not null default false,
   published boolean not null default true,
   created_at timestamptz not null default now()
 );
@@ -41,3 +45,4 @@ for insert to authenticated with check (bucket_id='news-images' and exists (sele
 create policy "Editors can delete news images" on storage.objects
 for delete to authenticated using (bucket_id='news-images' and exists (select 1 from public.admin_users where user_id=(select auth.uid())));
 create index if not exists news_created_by_idx on public.news (created_by);
+create unique index if not exists news_source_url_unique on public.news (source_url);

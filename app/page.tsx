@@ -12,6 +12,9 @@ type Article = {
   category?: string;
   kategorija?: string;
   image_url?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  published_at?: string | null;
 };
 
 function loadLocalNews(): Article[] {
@@ -30,14 +33,14 @@ async function loadNews(): Promise<Article[]> {
     try {
       const supabase = createClient(url, key, { auth: { persistSession: false } });
       const { data, error } = await supabase.from("news")
-        .select("id,influencer,title,body,category,image_url")
+        .select("id,influencer,title,body,category,image_url,source_name,source_url,published_at")
         .eq("published", true).order("created_at", { ascending: false });
-      if (!error && data?.length) return data as Article[];
+      if (!error) return (data ?? []) as Article[];
     } catch {
       // Keep the site available using the bundled news if Supabase is unavailable.
     }
   }
-  return loadLocalNews();
+  return url && key ? [] : loadLocalNews();
 }
 
 export const dynamic = "force-dynamic";
@@ -51,17 +54,10 @@ export default async function Page() {
   }));
   const featured = items[0] ?? {
     influencer: "Vijesti za nezaposlene",
-    title: "Dobro došli na portal",
-    body: "Najnovije vijesti i analize iz digitalnog svijeta.",
-    category: "Naslovnica",
+    title: "Čekamo prve provjerene vijesti",
+    body: "Ovdje će se prikazivati stvarne vijesti iz medija s poveznicom na izvor. Bot provjerava nove objave svakih šest sati.",
+    category: "Automatsko praćenje",
   };
-  const ranking = [
-    { name: "Marko Jack", score: "99.8% šuplje", status: "Snima iz auta" },
-    { name: "Baka Prase", score: "95.2% dramatično", status: "Kupuje novi sat" },
-    { name: "Mihajlo Madić", score: "91.0% motivacija", status: "Dijeli savjete o uspjehu" },
-    { name: "Vanjorek obitelj", score: "88.5% obiteljski kaos", status: "Live uključivanje" },
-    { name: "Goldenito", score: "85.0% fleksanje", status: "Gleda u kameru" },
-  ];
 
   return (
     <main className="min-h-screen bg-white font-sans text-[#36454F]">
@@ -76,30 +72,25 @@ export default async function Page() {
           <div>
             <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
             <h1 className="mb-6 text-4xl font-bold leading-tight text-[#001F3F] md:text-5xl">{featured.title}</h1>
-            <p className="mb-8 text-xl leading-relaxed">{featured.body}</p>
-            <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">PROČITAJ ANALIZU</a>
+            <p className="mb-3 text-xl leading-relaxed">{featured.body}</p>
+            {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-8 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
+            {featured.source_url ? <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">OTVORI IZVOR ↗</a> : <a href="#najnovije" className="inline-block bg-[#FF8C00] px-8 py-4 font-bold text-white shadow-lg">POGLEDAJ VIJESTI</a>}
           </div>
           <div className="relative flex h-[400px] items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-gray-300 bg-gray-100">
-            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" /> : <p className="text-3xl font-bold uppercase text-gray-400">{featured.influencer}</p>}
-            <div className="z-10 bg-white/85 p-6 text-center"><div className="mx-auto mb-4 h-1 w-20 bg-[#FF8C00]" /><p className="italic text-[#001F3F]">"Uživo sa TikToka – dok ti tražiš posao."</p></div>
+            {featured.image_url ? <img src={featured.image_url} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" /> : <p className="px-8 text-center text-2xl font-bold uppercase text-gray-400">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
         </section>
-        <div className="mt-20 grid grid-cols-1 gap-12 lg:grid-cols-3">
+        <div className="mt-20 grid grid-cols-1 gap-12">
           <section id="najnovije" className="lg:col-span-2">
             <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {items.length <= 1 && <p className="rounded border border-gray-200 bg-gray-50 p-6 text-gray-600">Još nema novih vijesti iz pouzdanih izvora. Ne prikazujemo izmišljene ni probne članke.</p>}
               {items.slice(1).map((item, index) => <article key={item.id ?? index} className="overflow-hidden rounded border border-gray-200 shadow-sm">
                 {item.image_url && <img src={item.image_url} alt={item.title} className="h-48 w-full object-cover" />}
-                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p></div>
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p>{item.source_url && <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-xs font-semibold text-[#FF8C00]">Izvor: {item.source_name ?? "otvori članak"} ↗</a>}</div>
               </article>)}
             </div>
           </section>
-          <aside id="rang-lista" className="rounded-lg border border-gray-200 bg-gray-50 p-6">
-            <h3 className="mb-6 border-b pb-3 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
-            <div className="space-y-4">{ranking.map((item, index) => <div key={item.name} className="flex items-center justify-between rounded border bg-white p-4">
-              <div><span className="text-xs text-gray-400">#{index + 1}</span><h4 className="font-bold text-[#001F3F]">{item.name}</h4><p className="text-xs text-gray-500">{item.status}</p></div><span className="text-sm font-bold text-[#FF8C00]">{item.score}</span>
-            </div>)}</div>
-          </aside>
         </div>
       </div>
       <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">
