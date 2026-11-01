@@ -63,7 +63,17 @@ export default function AdminPage() {
     const { data, error } = await db.functions.invoke("draft-news", {
       body: { person: source, tiktokUrl, context, satire },
     });
-    if (error) setMessage("Nacrt nije napravljen. Provjeri da je Supabase funkcija postavljena i da OpenAI API ima aktivno plaćanje.");
+    if (error) {
+      let detail = error.message;
+      const response = (error as Error & { context?: Response }).context;
+      if (response) {
+        try {
+          const payload = await response.clone().json();
+          if (typeof payload?.error === "string") detail = payload.error;
+        } catch { /* Keep the SDK error message when the response has no JSON body. */ }
+      }
+      setMessage("Nacrt nije napravljen: " + detail);
+    }
     else if (data?.draft) {
       setTitle(data.draft.title); setCategory(data.draft.category); setBody(data.draft.body);
       setMessage("Nacrt je spreman — pregledaj ga pa klikni Objavi vijest.");
