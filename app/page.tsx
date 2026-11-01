@@ -64,7 +64,7 @@ export default async function Page() {
       <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] p-6 text-center text-3xl font-bold tracking-tight text-white">VIJESTI ZA NEZAPOSLENE</header>
       <nav className="border-b border-gray-200 bg-white py-3">
         <div className="mx-auto flex max-w-[1280px] gap-8 px-8 text-sm font-bold uppercase tracking-widest text-[#001F3F]">
-          <a href="/">Naslovnica</a><a href="#najnovije">TikTok Drama</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
+          <a href="/">Naslovnica</a><a href="#najnovije">Najnovije vijesti</a><a href="#rang-lista">Digitalac Rang Lista</a><a href="#najnovije">Analize</a>
         </div>
       </nav>
       <div className="mx-auto mt-12 max-w-[1280px] p-8">
@@ -84,6 +84,10 @@ export default async function Page() {
           <section id="najnovije" className="lg:col-span-2">
             <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {items.slice(0, 1).map((item, index) => <article key={item.id ?? `featured-${index}`} className="overflow-hidden rounded border border-gray-200 shadow-sm">
+                {item.image_url && <img src={item.image_url} alt={item.title} className="h-48 w-full object-cover" />}
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3><p className="text-sm leading-relaxed text-gray-600">{item.body}</p>{item.source_url && <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-xs font-semibold text-[#FF8C00]">Izvor: {item.source_name ?? "otvori članak"} ↗</a>}</div>
+              </article>)}
               {items.length <= 1 && <p className="rounded border border-gray-200 bg-gray-50 p-6 text-gray-600">Još nema novih vijesti iz pouzdanih izvora. Ne prikazujemo izmišljene ni probne članke.</p>}
               {items.slice(1).map((item, index) => <article key={item.id ?? index} className="overflow-hidden rounded border border-gray-200 shadow-sm">
                 {item.image_url && <img src={item.image_url} alt={item.title} className="h-48 w-full object-cover" />}
@@ -91,6 +95,13 @@ export default async function Page() {
               </article>)}
             </div>
           </section>
+          <aside id="rang-lista" className="rounded-lg border border-gray-200 bg-gray-50 p-6">
+            <h3 className="mb-2 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
+            <p className="mb-5 text-sm text-gray-600">Početni poredak</p>
+            <ol className="space-y-3">
+              {["Marko Jack", "Mihajlo Madić", "Ellen Vanjorek", "Vanjorek obitelj", "Marko Filipović", "Goldenito", "Barbi Afrika", "Choda", "Mudja", "Baka Prase"].map((name, index) => <li key={name} className="flex items-center gap-4 rounded border bg-white p-4"><span className="w-8 text-xl font-black text-[#FF8C00]">#{index + 1}</span><span className="font-bold text-[#001F3F]">{name}</span></li>)}
+            </ol>
+          </aside>
         </div>
       </div>
       <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">

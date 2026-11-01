@@ -13,15 +13,16 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 
 INFLUENCERS = [
-    ("Baka Prase", ["Baka Prase", "Bogdan Ilic", "Bogdan Ilić", "Бака Прасе", "Богдан Илић"]),
+    ("Marko Jack", ["Marko Jack"]),
+    ("Mihajlo Madić", ["Mihajlo Madic", "Mihajlo Madić"]),
+    ("Ellen Vanjorek", ["Ellen Vanjorek", "Ellen Vanjorek"]),
+    ("Vanjorek obitelj", ["Vanjorek obitelj", "Vanjorek family"]),
+    ("Marko Filipović", ["Marko Filipovic", "Marko Filipović"]),
+    ("Goldenito", ["Goldenito"]),
     ("Barbi Afrika", ["Barbi Afrika", "Barbara Milenkovic", "Barbara Milenković"]),
     ("Choda", ["Choda"]),
     ("Mudja", ["Mudja", "Muđa", "Муђа"]),
-    ("Marko Jack", ["Marko Jack"]),
-    ("Mihajlo Madić", ["Mihajlo Madic", "Mihajlo Madić"]),
-    ("Vanjorek obitelj", ["Vanjorek obitelj", "Vanjorek"]),
-    ("Goldenito", ["Goldenito"]),
-    ("Marko Filipović", ["Marko Filipovic", "Marko Filipović"]),
+    ("Baka Prase", ["Baka Prase", "Bogdan Ilic", "Bogdan Ilić"]),
 ]
 
 TRUSTED_DOMAINS = {
@@ -96,6 +97,8 @@ def collect():
                 searchable = normalized(title + " " + description)
 
                 if not title or not link or not published or published < cutoff:
+                    continue
+                if re.search(r"[\u0400-\u04FF]", title):
                     continue
                 if not source_name or not allowed_source(source_url):
                     continue
