@@ -16,6 +16,9 @@ type Article = {
   source_url?: string | null;
   published_at?: string | null;
   is_featured?: boolean;
+  created_by?: string | null;
+  is_automated?: boolean;
+  created_at?: string;
 };
 
 function loadLocalNews(): Article[] {
@@ -34,9 +37,17 @@ async function loadNews(): Promise<Article[]> {
     try {
       const supabase = createClient(url, key, { auth: { persistSession: false } });
       const { data, error } = await supabase.from("news")
-        .select("id,influencer,title,body,category,image_url,source_name,source_url,published_at,is_featured")
-        .eq("published", true).order("created_at", { ascending: false });
-      if (!error) return (data ?? []) as Article[];
+        .select("id,influencer,title,body,category,image_url,source_name,source_url,published_at,is_featured,created_by,is_automated,created_at")
+        .eq("published", true);
+      if (!error) {
+        const articles = (data ?? []) as Article[];
+        return articles.sort((a, b) => {
+          const priorityA = a.created_by ? 0 : a.is_automated ? 1 : 0;
+          const priorityB = b.created_by ? 0 : b.is_automated ? 1 : 0;
+          if (priorityA !== priorityB) return priorityA - priorityB;
+          return new Date(b.created_at ?? b.published_at ?? 0).getTime() - new Date(a.created_at ?? a.published_at ?? 0).getTime();
+        });
+      }
     } catch {
       // Keep the site available using the bundled news if Supabase is unavailable.
     }
