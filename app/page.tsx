@@ -21,6 +21,10 @@ type Article = {
   created_at?: string;
 };
 
+function excerpt(text: string | undefined, limit: number) {
+  const compact = (text ?? "").replace(/\s+/g, " ").trim();
+  return compact.length > limit ? `${compact.slice(0, limit).trimEnd()}…` : compact;
+}
 function loadLocalNews(): Article[] {
   try {
     const file = path.join(process.cwd(), "vijesti.json");
@@ -89,7 +93,7 @@ export default async function Page() {
           <div className="relative mb-5 flex min-h-0 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:mb-6 md:min-h-[420px]">
             {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" />) : <p className="px-6 py-16 text-center text-lg font-bold uppercase text-gray-400 sm:px-8 sm:py-24 sm:text-xl">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
           </div>
-          <p className="mb-3 max-w-5xl text-base leading-7 sm:text-lg sm:leading-relaxed">{featured.body}</p>
+          <p className="mb-3 max-w-5xl text-base leading-7 sm:text-lg sm:leading-relaxed">{excerpt(featured.body, 260)}</p>
           {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-5 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
           <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap">{featured.id && <a href={`/vijest/${featured.id}`} className="inline-block px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base bg-[#FF8C00]">OTVORI VIJEST I KOMENTIRAJ →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block border border-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-[#FF8C00] sm:px-8 sm:py-4 sm:text-base">OTVORI IZVOR ↗</a>}{!featured.id && <a href="#najnovije" className="inline-block bg-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base">POGLEDAJ VIJESTI</a>}</div>
         </section>
@@ -99,7 +103,7 @@ export default async function Page() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {items.filter((item) => item.id !== featured.id).map((item, index) => <article key={item.id ?? `featured-${index}`} className="overflow-hidden rounded border border-gray-200 shadow-sm">
                 {item.image_url && <a href={`/vijest/${item.id}`} className="block w-full bg-gray-100"><img src={item.image_url} alt={item.title} className="block h-auto max-h-[420px] w-full object-contain" /></a>}
-                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><a href={`/vijest/${item.id}`} className="block"><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3></a><p className="text-sm leading-relaxed text-gray-600">{item.body}</p><a href={`/vijest/${item.id}`} className="mt-4 inline-block text-sm font-bold text-[#FF8C00]">Pročitaj vijest i komentiraj →</a></div>
+                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><a href={`/vijest/${item.id}`} className="block"><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3></a><p className="text-sm leading-relaxed text-gray-600">{excerpt(item.body, 180)}</p><a href={`/vijest/${item.id}`} className="mt-4 inline-block text-sm font-bold text-[#FF8C00]">Pročitaj vijest i komentiraj →</a></div>
               </article>)}
               {items.length <= 1 && <p className="rounded border border-gray-200 bg-gray-50 p-6 text-gray-600">Još nema novih vijesti iz pouzdanih izvora. Ne prikazujemo izmišljene ni probne članke.</p>}
             </div>
