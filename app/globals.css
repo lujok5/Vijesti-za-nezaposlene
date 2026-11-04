@@ -9,6 +9,16 @@ body { background: #ffffff; font-family: Inter, Manrope, ui-sans-serif, system-u
 .ticker-track { animation: ticker-scroll 48s linear infinite; }
 .ticker-window:hover .ticker-track { animation-play-state: paused; }
 
+.rubric-nav-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+  scroll-behavior: smooth;
+}
+.rubric-nav-scroll::-webkit-scrollbar { height: 8px; }
+.rubric-nav-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+.rubric-nav-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 999px; }
+.rubric-nav-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
 @keyframes ticker-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
