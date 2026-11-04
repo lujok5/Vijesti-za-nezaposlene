@@ -1,63 +1,15 @@
-import fs from "fs";
-import path from "path";
-import { createClient } from "@supabase/supabase-js";
-
-type Article = {
-  id?: string;
-  influencer: string;
-  title?: string;
-  naslov?: string;
-  body?: string;
-  tekst?: string;
-  category?: string;
-  kategorija?: string;
-  image_url?: string | null;
-  source_name?: string | null;
-  source_url?: string | null;
-  published_at?: string | null;
-  is_featured?: boolean;
-  created_by?: string | null;
-  is_automated?: boolean;
-  created_at?: string;
-};
+import CityWeather from "./components/city-weather";
+import UnemploymentHistoryChart from "./components/unemployment-history-chart";
+import SatiricalClassifieds from "./components/satirical-classifieds";
+import UnemployedHoroscope from "./components/unemployed-horoscope";
+import HolidayCalendar from "./components/holiday-calendar";
+import { Article, categorySlug, formatDate, loadNews } from "./lib/news";
 
 function excerpt(text: string | undefined, limit: number) {
   const compact = (text ?? "").replace(/\s+/g, " ").trim();
   return compact.length > limit ? `${compact.slice(0, limit).trimEnd()}…` : compact;
 }
-function loadLocalNews(): Article[] {
-  try {
-    const file = path.join(process.cwd(), "vijesti.json");
-    return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf-8")) as Article[]) : [];
-  } catch {
-    return [];
-  }
-}
 
-async function loadNews(): Promise<Article[]> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (url && key) {
-    try {
-      const supabase = createClient(url, key, { auth: { persistSession: false } });
-      const { data, error } = await supabase.from("news")
-        .select("id,influencer,title,body,category,image_url,source_name,source_url,published_at,is_featured,created_by,is_automated,created_at")
-        .eq("published", true);
-      if (!error) {
-        const articles = (data ?? []) as Article[];
-        return articles.sort((a, b) => {
-          const priorityA = a.created_by ? 0 : a.is_automated ? 1 : 0;
-          const priorityB = b.created_by ? 0 : b.is_automated ? 1 : 0;
-          if (priorityA !== priorityB) return priorityA - priorityB;
-          return new Date(b.created_at ?? b.published_at ?? 0).getTime() - new Date(a.created_at ?? a.published_at ?? 0).getTime();
-        });
-      }
-    } catch {
-      // Keep the site available using the bundled news if Supabase is unavailable.
-    }
-  }
-  return url && key ? [] : loadLocalNews();
-}
 
 export const dynamic = "force-dynamic";
 
@@ -68,60 +20,122 @@ export default async function Page() {
     body: item.body ?? item.tekst ?? "",
     category: item.category ?? item.kategorija ?? "",
   }));
-  const featured = items.find((item) => item.is_featured) ?? items[0] ?? {
+  const featured: Article = items.find((item) => item.is_featured) ?? items[0] ?? {
     influencer: "Vijesti za nezaposlene",
     title: "Čekamo prve provjerene vijesti",
-    body: "Ovdje će se prikazivati stvarne vijesti iz medija s poveznicom na izvor. Bot provjerava nove objave svakih šest sati.",
+    body: "Ovdje će se prikazivati stvarne vijesti iz medija s poveznicom na izvor.",
     category: "Automatsko praćenje",
   };
+  const secondaryItems = items.filter((item) => item.id !== featured.id).slice(0, 3);
+  const homepageLeadKeys = new Set([featured, ...secondaryItems].map((item) => item.id ?? item.title));
+  const categories = [...new Set(items.map((item) => item.category).filter(Boolean))];
+  const creators = [...new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo"))];
+  const firstByCategory = new Map<string, string>();
+  for (const item of items) if (item.id && item.category && !firstByCategory.has(item.category)) firstByCategory.set(item.category, item.id);
+  const tickerItems = items.slice(0, 8);
+  const mondayUtc = new Date();
+  mondayUtc.setUTCHours(0, 0, 0, 0);
+  const daysSinceMonday = (mondayUtc.getUTCDay() + 6) % 7;
+  mondayUtc.setUTCDate(mondayUtc.getUTCDate() - daysSinceMonday);
+  const weekCount = items.filter((item) => new Date(item.created_at ?? item.published_at ?? 0) >= mondayUtc).length;
 
   return (
-    <main className="min-h-screen bg-white font-sans text-[#36454F]">
-      <header className="border-b-4 border-[#FF8C00] bg-[#001F3F] px-3 py-3 sm:px-8"><div className="mx-auto flex max-w-[1440px] items-center gap-2 sm:gap-3"><a href="/" aria-label="Naslovnica" className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white sm:h-14 sm:w-14"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a><a href="/" className="text-[1.35rem] font-extrabold tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a></div></header>
-      <nav className="border-b border-gray-200 bg-white py-3">
-        <div className="mx-auto flex max-w-[1280px] snap-x snap-mandatory items-center justify-start gap-7 overflow-x-auto overscroll-x-contain whitespace-nowrap px-4 text-xs font-bold uppercase tracking-[0.12em] text-[#001F3F] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-center sm:gap-8 sm:px-8 sm:text-sm sm:tracking-widest">
-          <a className="shrink-0 snap-start py-2" href="/">Naslovnica</a><a className="shrink-0 snap-start py-2" href="#najnovije">Najnovije vijesti</a><a className="shrink-0 snap-start py-2" href="#rang-lista">Digitalac Rang Lista</a><a className="shrink-0 snap-start py-2" href="#najnovije">Analize</a>
+    <main className="min-h-screen bg-white font-sans text-[#17243A]">
+      <header className="border-b border-[#17243A] bg-[#17243A] px-3 py-4 sm:px-8">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-3">
+          <a href="/" aria-label="Naslovnica" className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white sm:h-14 sm:w-14"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a>
+          <a href="/" className="text-xl font-black tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a>
+          <span className="ml-auto hidden items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300 sm:flex"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />Uživo iz redakcije</span>
+        </div>
+      </header>
+
+      <section aria-label="Najnovije vijesti" className="overflow-hidden border-b border-slate-200 bg-[#F5F6F7]">
+        <div className="mx-auto flex max-w-[1440px] items-stretch">
+          <span className="z-10 flex shrink-0 items-center gap-2 bg-red-600 px-4 py-3 text-xs font-black uppercase tracking-widest text-white"><span className="h-2 w-2 animate-pulse rounded-full bg-white" />Uživo</span>
+          <div className="ticker-window min-w-0 flex-1 py-3">
+            {tickerItems.length > 0 ? <div className="ticker-track flex w-max items-center gap-10 whitespace-nowrap">{[...tickerItems, ...tickerItems].map((item, index) => <a key={`${item.id ?? item.title}-${index}`} href={item.id ? `/vijest/${item.id}` : "#najnovije"} className="text-sm font-semibold text-[#17243A] hover:text-red-600"><span className="mr-3 text-red-500">●</span>{item.title}</a>)}</div> : <p className="px-5 text-sm text-slate-500">Najnovije vijesti uskoro stižu.</p>}
+          </div>
+        </div>
+      </section>
+
+      <nav aria-label="Rubrike" className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-3 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8">
+          <a className="shrink-0 rounded-full bg-red-600 px-4 py-2 text-xs font-black uppercase tracking-wider text-white" href="#naslovnica">Naslovnica</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/breaking-news">Breaking News</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#najnovije">Najnovije</a>
+          {categories.map((category) => <a key={category} className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href={`#rubrika-${categorySlug(category)}`}>{category}</a>)}
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#digitalci">Digitalci</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/crna-kronika">Crna kronika</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#statistika">Ekonomija</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/burza">Burza</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/lifestyle">Lifestyle</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/ekskluzivno">Ekskluzivno</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/arhiva">Arhiva</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#prognoza">Prognoza</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#oglasnik">Oglasnik</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#horoskop">Horoskop</a>
+          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#kalendar">Kalendar</a>
         </div>
       </nav>
-      <div className="mx-auto mt-6 grid w-full max-w-[1440px] grid-cols-1 gap-8 px-4 sm:mt-8 sm:px-6 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.85fr)]">
+
+      <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-8 px-4 py-7 sm:px-6 md:px-8 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.8fr)]">
         <div className="min-w-0">
-        <section className="border-b pb-10">
-          <div>
-            <span className="mb-4 inline-block bg-[#CC0000] px-2 py-1 text-xs font-bold uppercase text-white">{featured.category}</span>
-            {featured.id ? <a href={`/vijest/${featured.id}`} className="block"><h1 className="mb-5 max-w-5xl break-words text-3xl font-bold leading-tight text-[#001F3F] hover:text-[#FF8C00] sm:text-4xl md:mb-6 md:text-5xl">{featured.title}</h1></a> : <h1 className="mb-5 max-w-5xl break-words text-3xl font-bold leading-tight text-[#001F3F] sm:text-4xl md:mb-6 md:text-5xl">{featured.title}</h1>}
-          </div>
-          <div className="relative mb-5 flex min-h-0 w-full max-w-4xl items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:mb-6 md:min-h-[420px]">
-            {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[58vh] w-full object-contain sm:max-h-[70vh]" />) : <p className="px-6 py-16 text-center text-lg font-bold uppercase text-gray-400 sm:px-8 sm:py-24 sm:text-xl">{featured.source_name ? `Izvor: ${featured.source_name}` : "Vijesti s provjerenim izvorom"}</p>}
-          </div>
-          <p className="mb-3 max-w-5xl text-base leading-7 sm:text-lg sm:leading-relaxed">{excerpt(featured.body, 260)}</p>
-          {featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="mb-5 inline-block text-sm font-semibold text-[#FF8C00]">Izvor: {featured.source_name ?? "otvori članak"} ↗</a>}
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap">{featured.id && <a href={`/vijest/${featured.id}`} className="inline-block px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base bg-[#FF8C00]">OTVORI VIJEST I KOMENTIRAJ →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="inline-block border border-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-[#FF8C00] sm:px-8 sm:py-4 sm:text-base">OTVORI IZVOR ↗</a>}{!featured.id && <a href="#najnovije" className="inline-block bg-[#FF8C00] px-5 py-3 text-center text-sm font-bold text-white shadow-lg sm:px-8 sm:py-4 sm:text-base">POGLEDAJ VIJESTI</a>}</div>
-        </section>
-        <div className="mt-10">
-          <section id="najnovije">
-            <h2 className="mb-8 border-l-8 border-[#FF8C00] pl-4 text-2xl font-bold text-[#001F3F]">NAJNOVIJE VIJESTI S MREŽA</h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {items.filter((item) => item.id !== featured.id).map((item, index) => <article key={item.id ?? `featured-${index}`} className="overflow-hidden rounded border border-gray-200 shadow-sm">
-                {item.image_url && <a href={`/vijest/${item.id}`} className="block w-full bg-gray-100"><img src={item.image_url} alt={item.title} className="block h-auto max-h-[420px] w-full object-contain" /></a>}
-                <div className="p-6"><span className="text-xs font-bold uppercase text-[#FF8C00]">{item.category}</span><a href={`/vijest/${item.id}`} className="block"><h3 className="mb-3 mt-2 text-lg font-bold text-[#001F3F]">{item.title}</h3></a><p className="text-sm leading-relaxed text-gray-600">{excerpt(item.body, 180)}</p><a href={`/vijest/${item.id}`} className="mt-4 inline-block text-sm font-bold text-[#FF8C00]">Pročitaj vijest i komentiraj →</a></div>
+          <section id="naslovnica" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {featured.id && firstByCategory.get(featured.category) === featured.id && <span id={`rubrika-${categorySlug(featured.category)}`} className="block scroll-mt-28" aria-hidden="true" />}
+            <div className="p-5 sm:p-8">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-bold uppercase tracking-wider"><span className="rounded bg-red-600 px-3 py-1.5 text-white">{featured.category}</span><time className="text-slate-600">{formatDate(featured.published_at ?? featured.created_at)}</time>{featured.source_name && <span className="text-slate-600">{(featured.source_count ?? 1) > 1 ? `Izvještava ${featured.source_count} izvora` : `Izvor: ${featured.source_name}`}</span>}</div>
+              {featured.id ? <a href={`/vijest/${featured.id}`}><h1 className="mb-5 max-w-5xl break-words text-4xl font-black leading-[1.05] tracking-tight text-[#17243A] hover:text-red-600 sm:text-5xl md:text-6xl">{featured.title}</h1></a> : <h1 className="mb-5 max-w-5xl break-words text-4xl font-black leading-[1.05] tracking-tight text-[#17243A] sm:text-5xl md:text-6xl">{featured.title}</h1>}
+            </div>
+            <div className="relative flex min-h-48 w-full items-center justify-center overflow-hidden bg-slate-100 sm:min-h-72">
+              {featured.image_url ? (featured.id ? <a href={`/vijest/${featured.id}`} className="flex max-h-[70vh] w-full items-center justify-center"><img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" /></a> : <img src={featured.image_url} alt={featured.title} className="max-h-[70vh] w-full object-contain" />) : <div className="flex min-h-48 w-full items-center justify-center bg-[#F5F6F7] p-8 text-center sm:min-h-72"><span className="text-xl font-black uppercase tracking-[0.25em] text-[#17243A]/25">{featured.category}</span></div>}
+            </div>
+            <div className="p-5 sm:p-8">
+              <p className="mb-5 max-w-4xl text-base leading-7 text-slate-600 sm:text-lg">{excerpt(featured.body, 260)}</p>
+              <div className="flex flex-wrap items-center gap-3">{featured.id && <a href={`/vijest/${featured.id}`} className="rounded bg-red-600 px-5 py-3 text-sm font-black text-white transition hover:bg-red-500">PROČITAJ CIJELU VIJEST →</a>}{featured.source_url && <a href={featured.source_url} target="_blank" rel="noopener noreferrer" className="rounded border border-slate-300 px-5 py-3 text-sm font-bold text-[#17243A] hover:border-red-500">IZVOR ↗</a>}</div>
+            </div>
+          </section>
+
+          {secondaryItems.length > 0 && <section aria-label="Još važne vijesti" className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {secondaryItems.map((item) => <article id={firstByCategory.get(item.category) === item.id ? `rubrika-${categorySlug(item.category)}` : undefined} key={item.id ?? item.title} className="scroll-mt-28 overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-red-500/60 hover:bg-slate-50">
+              <a href={item.id ? `/vijest/${item.id}` : "#najnovije"} className="block bg-slate-100">{item.image_url ? <img src={item.image_url} alt={item.title} className="block h-40 w-full object-cover" /> : <div className="flex h-40 items-center justify-center bg-[#F5F6F7]"><span className="px-4 text-center text-sm font-black uppercase tracking-widest text-[#17243A]/40">{item.category}</span></div>}</a>
+              <div className="p-4"><p className="text-[10px] font-black uppercase tracking-wider text-red-600">{item.category}</p><a href={item.id ? `/vijest/${item.id}` : "#najnovije"}><h2 className="mt-2 line-clamp-3 text-lg font-extrabold leading-snug text-[#17243A] hover:text-red-600">{item.title}</h2></a><time className="mt-3 block text-xs text-slate-500">{formatDate(item.published_at ?? item.created_at)}</time></div>
+            </article>)}
+          </section>}
+
+          <section id="najnovije" className="mt-12 scroll-mt-24">
+            <div className="mb-6 flex items-end justify-between border-b border-slate-200 pb-4"><div><p className="text-xs font-black uppercase tracking-[0.25em] text-red-500">Iz minute u minutu</p><h2 className="mt-2 text-3xl font-black uppercase tracking-tight text-[#17243A] sm:text-4xl">Najnovije vijesti</h2></div><span className="text-xs font-bold uppercase tracking-widest text-slate-500">Ažurirano uživo</span></div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {items.filter((item) => !homepageLeadKeys.has(item.id ?? item.title)).map((item) => <article id={firstByCategory.get(item.category) === item.id ? `rubrika-${categorySlug(item.category)}` : undefined} key={item.id ?? item.title} className="scroll-mt-28 overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-red-500/60 hover:bg-slate-50">
+                <a href={item.id ? `/vijest/${item.id}` : "#najnovije"} className="block w-full bg-slate-100">{item.image_url ? <img src={item.image_url} alt={item.title} className="block max-h-[360px] w-full object-contain" /> : <div className="flex h-48 items-center justify-center bg-[#F5F6F7]"><span className="px-6 text-center text-lg font-black uppercase tracking-[0.2em] text-[#17243A]/35">{item.category}</span></div>}</a>
+              <div className="p-5"><div className="mb-3 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-wider"><span className="rounded bg-red-600/15 px-2.5 py-1 text-red-700">{item.category}</span><time className="text-slate-500">{formatDate(item.published_at ?? item.created_at)}</time></div><a href={item.id ? `/vijest/${item.id}` : "#najnovije"} className="block"><h3 className="mb-3 text-xl font-extrabold leading-snug text-[#17243A] hover:text-red-600">{item.title}</h3></a><p className="text-sm leading-6 text-slate-600">{excerpt(item.body, 180)}</p>{item.source_name && <p className="mt-4 text-xs font-semibold text-slate-500">{(item.source_count ?? 1) > 1 ? `${item.source_count} izvora izvještava o događaju` : `Izvor: ${item.source_name}`}</p>}<a href={item.id ? `/vijest/${item.id}` : "#najnovije"} className="mt-5 inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-red-700 hover:text-red-800">Otvori vijest <span aria-hidden="true">→</span></a></div>
               </article>)}
-              {items.length <= 1 && <p className="rounded border border-gray-200 bg-gray-50 p-6 text-gray-600">Još nema novih vijesti iz pouzdanih izvora. Ne prikazujemo izmišljene ni probne članke.</p>}
+              {items.length === 0 && <p className="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">Još nema novih vijesti iz pouzdanih izvora.</p>}
+              {items.length > 0 && items.length <= homepageLeadKeys.size && <p className="rounded-xl border border-slate-200 bg-white p-6 text-slate-600">Prikazane su sve dostupne vijesti iz pouzdanih izvora.</p>}
             </div>
           </section>
         </div>
-        </div>
-        <aside id="rang-lista" className="h-fit rounded-lg border border-gray-200 bg-gray-50 p-6 lg:sticky lg:top-6">
-            <h3 className="mb-2 text-xl font-bold text-[#001F3F]">Digitalac Rang Lista</h3>
-            <p className="mb-5 text-sm text-gray-600">Početni poredak</p>
-            <ol className="space-y-3">
-              {["Marko Jack", "Mihajlo Madić", "Ellen Vanjorek", "Vanjorek obitelj", "Marko Filipović", "Goldenito", "Barbi Afrika", "Choda", "Mudja", "Baka Prase"].map((name, index) => <li key={name} className="flex items-center gap-4 rounded border bg-white p-4"><span className="w-8 text-xl font-black text-[#FF8C00]">#{index + 1}</span><span className="font-bold text-[#001F3F]">{name}</span></li>)}
-            </ol>
+
+        <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+          <section aria-label="Satirični indeks" className="overflow-hidden rounded-2xl border border-red-500/30 bg-[#F5F6F7]">
+            <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4"><span className="flex items-center gap-2 rounded bg-red-600 px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-white"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />LIVE</span><span className="text-xs font-bold uppercase tracking-widest text-red-700">Satirična rubrika</span></div>
+            <div className="p-5"><h2 className="text-2xl font-black uppercase leading-tight text-[#17243A]">Tržište nezaposlenih</h2><p className="mt-2 text-xs leading-5 text-slate-600">Satirični prikaz portala. Broj objava nije stvarna stopa nezaposlenosti ni financijski pokazatelj.</p><div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-lg border border-slate-200 bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Objave ovaj tjedan</p><p className="mt-2 text-3xl font-black text-[#17243A]">{weekCount}</p></div><div className="rounded-lg border border-slate-200 bg-white p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">U fokusu</p><p className="mt-2 line-clamp-2 text-sm font-extrabold text-red-700">{featured.influencer}</p></div></div><p className="mt-4 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Podaci: objave na ovom portalu</p></div>
+          </section>
+          <section id="rang-lista" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5"><div className="mb-5 border-b border-slate-200 pb-4"><p className="text-xs font-black uppercase tracking-[0.2em] text-red-500">Tko dominira mrežama</p><h2 className="mt-2 text-2xl font-black text-[#17243A]">Digitalac Rang Lista</h2></div><ol className="space-y-2">{["Marko Jack", "Mihajlo Madić", "Ellen Vanjorek", "Vanjorek obitelj", "Marko Filipović", "Goldenito", "Barbi Afrika", "Choda", "Mudja", "Baka Prase"].map((name, index) => <li key={name} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3"><span className="w-8 text-lg font-black text-red-500">#{index + 1}</span><span className="font-bold text-[#17243A]">{name}</span></li>)}</ol></section>
         </aside>
       </div>
-      <footer className="mt-32 bg-[#001F3F] p-12 text-center text-sm text-white">
-        <p>© 2026 VIJESTI ZA NEZAPOSLENE - Sva prava pridržana onima koji nemaju pametnijeg posla.</p>
-        <a href="/admin" className="mt-3 inline-block text-white/60 hover:text-white">Uredništvo</a>
-      </footer>
+      <div className="mx-auto mt-8 grid w-full max-w-[1440px] gap-6 px-4 sm:px-6 md:px-8">
+        <section id="digitalci" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="creators-title">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Imena o kojima pišemo</p><h2 id="creators-title" className="mt-2 text-2xl font-black text-[#17243A] sm:text-3xl">Digitalci</h2>
+          {creators.length ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{creators.map((name) => { const story = items.find((item) => item.influencer === name); return <article key={name} className="rounded-xl border border-slate-200 bg-[#F5F6F7] p-4"><h3 className="font-extrabold text-[#17243A]">{name}</h3>{story && <><p className="mt-2 line-clamp-2 text-sm leading-5 text-slate-600">{story.title}</p>{story.id && <a href={`/vijest/${story.id}`} className="mt-3 inline-block text-xs font-black uppercase text-red-700">Posljednja vijest →</a>}</>}</article>; })}</div> : <p className="mt-4 text-sm text-slate-600">Profili će se pojaviti uz prve objavljene vijesti.</p>}
+          <p className="mt-4 text-xs text-slate-500">Pregled digitalaca povezanih s objavljenim pričama.</p>
+        </section>
+        <div id="statistika" className="scroll-mt-24"><UnemploymentHistoryChart /></div>
+        <div id="prognoza" className="scroll-mt-24"><CityWeather /></div>
+        <SatiricalClassifieds />
+        <UnemployedHoroscope />
+        <HolidayCalendar />
+      </div>
+      <footer className="mt-20 border-t border-slate-200 bg-[#F5F6F7] px-6 py-10 text-center text-xs text-slate-600"><p>© 2026 VIJESTI ZA NEZAPOSLENE · Satirični portal. Provjerite izvor prije dijeljenja.</p><a href="/admin" className="mt-3 inline-block text-slate-600 hover:text-[#17243A]">Uredništvo</a></footer>
     </main>
   );
 }

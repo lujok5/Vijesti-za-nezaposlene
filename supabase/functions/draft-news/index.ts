@@ -43,20 +43,32 @@ Deno.serve(async (request) => {
     } catch { return respond({ error: "Unesi valjanu HTTPS poveznicu na TikTok." }, 400); }
   }
 
-  const instructions = "Napiši nacrt na hrvatskoj latinici za zabavni portal o digitalcima. Vrati samo JSON s poljima title, category, body. Ako je satire=true, category mora biti 'Satira', jasno označi tekst kao izmišljen i ne izmišljaj stvarne citate, optužbe ni događaje. Ako je satire=false, koristi samo činjenice iz predanog opisa/transkripta; poveznica sama nije dokaz sadržaja videa. Kad nema dovoljno podataka, traži opis umjesto nagađanja. Piši živahno, ali ne predstavi izmišljeno kao činjenicu. Naslov do 180 znakova, tekst 2-4 odlomka.";
-  const userInput = JSON.stringify({ person, tiktokUrl: tiktokUrl || null, context: context || null, satire: Boolean(input.satire) });
+  const instructions = "Napiši urednički nacrt na hrvatskoj latinici. Vrati samo JSON objekt s poljima title, category, body. Odaberi category iz: Breaking News, Digitalci, Crna kronika, Ekonomija, Burza, Lifestyle, Ekskluzivno, Satira. Ako je satire=true, category mora biti 'Satira'; jasno označi priču kao izmišljenu i ne izmišljaj stvarne citate, optužbe ni događaje. Ako je satire=false, koristi samo činjenice iz predanog opisa/transkripta; poveznica sama nije dokaz sadržaja videa. Kad nema dovoljno podataka, predloži uredniku da zatraži dodatni opis. Predloži privlačan, ali činjeničan naslov do 180 znakova. Piši 2–4 sažeta odlomka i ne predstavljaj neprovjerene navode kao činjenice.";
+  const userInput = "Return a json object with title, category, and body for this draft: " + JSON.stringify({ person, tiktokUrl: tiktokUrl || null, context: context || null, satire: Boolean(input.satire) });
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "gpt-4o-mini", instructions, input: userInput, max_output_tokens: 700 }),
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      instructions,
+      input: userInput,
+      max_output_tokens: 900,
+      text: { format: { type: "json_object" } },
+    }),
   });
-  if (!response.ok) return respond({ error: "AI nije mogao napraviti nacrt. Provjeri API ključ i OpenAI billing." }, 502);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const apiMessage = typeof errorBody?.error?.message === "string" ? errorBody.error.message : "Nepoznata OpenAI API greška.";
+    console.error("OpenAI Responses API error", response.status, errorBody?.error?.type ?? "unknown", errorBody?.error?.code ?? "unknown");
+    return respond({ error: `OpenAI API (${response.status}): ${apiMessage}` }, 502);
+  }
   const result = await response.json();
   const output = (result.output ?? []).flatMap((item: { content?: Array<{ type?: string; text?: string }> }) => item.content ?? []).find((item: { type?: string }) => item.type === "output_text")?.text;
   if (!output) return respond({ error: "AI nije vratio tekst nacrta." }, 502);
   try {
-    const draft = JSON.parse(output);
+    const draft = JSON.parse(output.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, ""));
     if (typeof draft.title !== "string" || typeof draft.category !== "string" || typeof draft.body !== "string") throw new Error();
+    if (!new Set(["Breaking News", "Digitalci", "Crna kronika", "Ekonomija", "Burza", "Lifestyle", "Ekskluzivno", "Satira"]).has(draft.category)) draft.category = input.satire ? "Satira" : "Digitalci";
     return respond({ draft });
   } catch { return respond({ error: "AI je vratio neispravan nacrt. Pokušaj ponovno." }, 502); }
 });

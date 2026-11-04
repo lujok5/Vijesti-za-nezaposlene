@@ -1,1 +1,20 @@
-﻿@tailwind base; @tailwind components; @tailwind utilities;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { background: #ffffff; font-family: Inter, Manrope, ui-sans-serif, system-ui, sans-serif; }
+
+.ticker-window { overflow: hidden; }
+.ticker-track { animation: ticker-scroll 48s linear infinite; }
+.ticker-window:hover .ticker-track { animation-play-state: paused; }
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ticker-track { animation: none; }
+}

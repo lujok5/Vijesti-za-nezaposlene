@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 
 type Story = { id: string; influencer: string; title: string; category: string; body: string; image_path: string | null; source_url: string | null; source_name: string | null; is_featured: boolean };
+const categories = ["Breaking News", "Digitalci", "Crna kronika", "Ekonomija", "Burza", "Lifestyle", "Ekskluzivno", "Satira"];
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -112,7 +113,7 @@ export default function AdminPage() {
         source_name: validatedTikTokUrl ? "TikTok" : null, source_url: validatedTikTokUrl, published: true,
       };
       const saved = editingId
-        ? await db.from("news").update({ ...article, ...(imageUrl ? {} : { image_url: undefined, image_path: undefined }) }).eq("id", editingId)
+        ? await db.from("news").update({ ...article, created_by: user.id, is_automated: false, ...(imageUrl ? {} : { image_url: undefined, image_path: undefined }) }).eq("id", editingId)
         : await db.from("news").insert({ ...article, created_by: user.id });
       if (saved.error) throw saved.error;
       setSource(""); setTitle(""); setCategory(""); setBody(""); setImage(null); setTiktokUrl(""); setEditingId(null);
@@ -181,7 +182,7 @@ export default function AdminPage() {
         <form onSubmit={publish} className="space-y-4">
           <label className="block text-sm">Osoba / izvor<input required maxLength={120} value={source} onChange={(e) => setSource(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">Naslov<input required maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
-          <label className="block text-sm">Kategorija<input required maxLength={80} value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
+          <label className="block text-sm">Kategorija<select required value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded border p-2">{category && !categories.includes(category) && <option value={category}>{category}</option>}<option value="">Odaberi rubriku</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
           <label className="block text-sm">Tekst vijesti<textarea required maxLength={10000} rows={7} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">TikTok poveznica (opcionalno)<input type="url" maxLength={2000} placeholder="https://www.tiktok.com/@korisnik/video/..." value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} className="mt-1 w-full rounded border p-2" /><span className="mt-1 block text-xs text-gray-500">Zalijepi poveznicu na video. Prepričaj događaj u tekstu vijesti; bot ne može automatski pročitati svaki TikTok video.</span></label>
           <label className="block text-sm">Opis ili transkript videa<textarea maxLength={6000} rows={4} value={context} onChange={(e) => setContext(e.target.value)} placeholder="Ako AI ne može otvoriti TikTok, ukratko napiši što se događa u videu." className="mt-1 w-full rounded border p-2" /></label>
