@@ -50,6 +50,9 @@ export default function UnemploymentHistoryChart() {
           {history.map((point) => <p key={point.year}>{point.year}: <span className="font-semibold">{formatNumber(point.total)}</span></p>)}
         </div>
       </details>
+      <blockquote className="mt-5 rounded-xl border-l-4 border-red-600 bg-[#F5F6F7] px-4 py-3 text-sm font-medium leading-6 text-[#17243A] sm:text-base">
+        Redakcija izražava ozbiljno nezadovoljstvo aktualnim trendovima. Kontinuirani pad broja nezaposlenih smatramo neprihvatljivim te pozivamo građane da prestanu donositi ishitrene odluke poput zapošljavanja.
+      </blockquote>
       <p className="mt-4 break-words text-xs leading-5 text-slate-500">Izvor: red „Ukupno” u priloženoj datoteci statistika.xls. Odgovarajuća serija HZZ-a prikazuje godišnji prosjek registriranih nezaposlenih; vrijednost za 2026. je dosad ostvareni prosjek. <a className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-[#17243A]" href="https://statistika.hzz.hr/Statistika.aspx?tipIzvjestaja=3%2C" target="_blank" rel="noopener noreferrer">HZZ Statistika On‑Line ↗</a></p>
     </section>
   );
