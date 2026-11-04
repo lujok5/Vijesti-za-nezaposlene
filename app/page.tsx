@@ -28,8 +28,8 @@ export default async function Page() {
   };
   const secondaryItems = items.filter((item) => item.id !== featured.id).slice(0, 3);
   const homepageLeadKeys = new Set([featured, ...secondaryItems].map((item) => item.id ?? item.title));
-  const categories = [...new Set(items.map((item) => item.category).filter(Boolean))];
-  const creators = [...new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo"))];
+  const categories = Array.from(new Set(items.map((item) => item.category).filter(Boolean)));
+  const creators = Array.from(new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo")));
   const firstByCategory = new Map<string, string>();
   for (const item of items) if (item.id && item.category && !firstByCategory.has(item.category)) firstByCategory.set(item.category, item.id);
   const tickerItems = items.slice(0, 8);
