@@ -31,6 +31,27 @@ export default async function Page() {
   const secondaryItems = editorialItems.filter((item) => item.id !== featured.id).slice(0, 3);
   const homepageLeadKeys = new Set([featured, ...secondaryItems].map((item) => item.id ?? item.title));
   const categories = Array.from(new Set(editorialItems.map((item) => item.category).filter(Boolean)));
+  const navLinks: { label: string; href: string; active?: boolean }[] = [
+    { label: "Naslovnica", href: "#naslovnica", active: true },
+    { label: "Breaking News", href: "/rubrika/breaking-news" },
+    { label: "Najnovije", href: "#najnovije" },
+    { label: "Lifestyle", href: "/rubrika/lifestyle" },
+    { label: "Digitalci", href: "#digitalci" },
+    { label: "Ekskluzivno", href: "/rubrika/ekskluzivno" },
+    { label: "Crna kronika", href: "/rubrika/crna-kronika" },
+    { label: "Ekonomija", href: "#statistika" },
+    { label: "Burza", href: "/rubrika/burza" },
+    { label: "Statistika", href: "#statistika" },
+    { label: "Prognoza", href: "#prognoza" },
+    { label: "Oglasnik", href: "#oglasnik" },
+    { label: "Horoskop", href: "#horoskop" },
+    { label: "Kalendar", href: "#kalendar" },
+    { label: "Arhiva", href: "/arhiva" },
+  ];
+  const fixedCategorySlugs = new Set(navLinks.map((link) => categorySlug(link.label)));
+  for (const category of categories) {
+    if (!fixedCategorySlugs.has(categorySlug(category))) navLinks.splice(3, 0, { label: category, href: `#rubrika-${categorySlug(category)}` });
+  }
   const creators = Array.from(new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo")));
   const firstByCategory = new Map<string, string>();
   for (const item of editorialItems) if (item.id && item.category && !firstByCategory.has(item.category)) firstByCategory.set(item.category, item.id);
@@ -42,11 +63,11 @@ export default async function Page() {
   const weekCount = items.filter((item) => new Date(item.created_at ?? item.published_at ?? 0) >= mondayUtc).length;
 
   return (
-    <main className="min-h-screen bg-white font-sans text-[#17243A]">
+    <main className="min-h-screen w-full overflow-x-clip bg-white font-sans text-[#17243A]">
       <header className="border-b border-[#17243A] bg-[#17243A] px-3 py-4 sm:px-8">
         <div className="mx-auto flex max-w-[1440px] items-center gap-3">
           <a href="/" aria-label="Naslovnica" className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-white sm:h-14 sm:w-14"><img src="/logo-vijesti.png" alt="" className="h-full w-full object-cover" /></a>
-          <a href="/" className="text-xl font-black tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a>
+          <a href="/" className="min-w-0 flex-1 truncate text-base font-black tracking-tight text-white sm:text-3xl">VIJESTI ZA NEZAPOSLENE</a>
           <span className="ml-auto hidden items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-300 sm:flex"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />Uživo iz redakcije</span>
         </div>
       </header>
@@ -60,23 +81,15 @@ export default async function Page() {
         </div>
       </section>
 
-      <nav aria-label="Rubrike" className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 py-3 backdrop-blur">
-        <div tabIndex={0} className="rubric-nav-scroll mx-auto flex max-w-[1440px] items-center gap-3 overflow-x-auto overscroll-x-contain px-4 py-1 sm:px-8" aria-label="Pomične poveznice rubrika">
-          <a className="shrink-0 rounded-full bg-red-600 px-4 py-2 text-xs font-black uppercase tracking-wider text-white" href="#naslovnica">Naslovnica</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/breaking-news">Breaking News</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#najnovije">Najnovije</a>
-          {categories.map((category) => <a key={category} className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href={`#rubrika-${categorySlug(category)}`}>{category}</a>)}
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#digitalci">Digitalci</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/crna-kronika">Crna kronika</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#statistika">Ekonomija</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/burza">Burza</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/lifestyle">Lifestyle</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/rubrika/ekskluzivno">Ekskluzivno</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="/arhiva">Arhiva</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#prognoza">Prognoza</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#oglasnik">Oglasnik</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#horoskop">Horoskop</a>
-          <a className="shrink-0 rounded-full border border-slate-300 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#17243A] hover:border-red-500" href="#kalendar">Kalendar</a>
+      <nav aria-label="Rubrike" className="z-20 border-b border-slate-200 bg-white/95 backdrop-blur sm:sticky sm:top-0">
+        <details className="mobile-rubric-menu px-4 py-2 sm:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-[#17243A]">Rubrike <span className="text-red-600">＋</span></summary>
+          <div className="grid grid-cols-2 gap-2 pb-2 pt-3">
+            {navLinks.map((link) => <a key={link.label} className={`rounded-lg border px-3 py-3 text-center text-xs font-bold uppercase tracking-wide ${link.active ? "border-red-600 bg-red-600 text-white" : "border-slate-200 bg-white text-[#17243A] hover:border-red-500"}`} href={link.href}>{link.label}</a>)}
+          </div>
+        </details>
+        <div className="mx-auto hidden max-w-[1440px] flex-wrap justify-center gap-2 px-6 py-3 sm:flex">
+          {navLinks.map((link) => <a key={link.label} className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${link.active ? "border-red-600 bg-red-600 text-white" : "border-slate-300 bg-white text-[#17243A] hover:border-red-500 hover:text-red-700"}`} href={link.href}>{link.label}</a>)}
         </div>
       </nav>
 
