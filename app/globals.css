@@ -12,6 +12,10 @@ body { width: 100%; min-width: 320px; background: #ffffff; font-family: Inter, M
 .mobile-rubric-menu > summary::-webkit-details-marker { display: none; }
 .mobile-rubric-menu[open] > summary span { transform: rotate(45deg); }
 
+@media (max-width: 639px) {
+  .unemployment-chart text { font-size: 20px; }
+}
+
 @keyframes ticker-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }

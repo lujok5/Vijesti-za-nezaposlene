@@ -147,13 +147,13 @@ export default async function Page() {
           </article>)}
         </section>
       </details>}
-      <div className="mx-auto mt-8 grid w-full max-w-[1440px] gap-6 px-4 sm:px-6 md:px-8">
-        <section id="digitalci" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="creators-title">
+      <div className="mx-auto mt-8 grid w-full min-w-0 max-w-[1440px] gap-6 px-3 sm:px-6 md:px-8 [&>*]:min-w-0">
+        <section id="digitalci" className="min-w-0 scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7" aria-labelledby="creators-title">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Imena o kojima pišemo</p><h2 id="creators-title" className="mt-2 text-2xl font-black text-[#17243A] sm:text-3xl">Digitalci</h2>
           {creators.length ? <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{creators.map((name) => { const story = items.find((item) => item.influencer === name); return <article key={name} className="rounded-xl border border-slate-200 bg-[#F5F6F7] p-4"><h3 className="font-extrabold text-[#17243A]">{name}</h3>{story && <><p className="mt-2 line-clamp-2 text-sm leading-5 text-slate-600">{story.title}</p>{story.id && <a href={`/vijest/${story.id}`} className="mt-3 inline-block text-xs font-black uppercase text-red-700">Posljednja vijest →</a>}</>}</article>; })}</div> : <p className="mt-4 text-sm text-slate-600">Profili će se pojaviti uz prve objavljene vijesti.</p>}
           <p className="mt-4 text-xs text-slate-500">Pregled digitalaca povezanih s objavljenim pričama.</p>
         </section>
-        <div id="statistika" className="scroll-mt-24"><UnemploymentHistoryChart /></div>
+        <div id="statistika" className="min-w-0 scroll-mt-24"><UnemploymentHistoryChart /></div>
         <div id="prognoza" className="scroll-mt-24"><CityWeather /></div>
         <SatiricalClassifieds />
         <UnemployedHoroscope />

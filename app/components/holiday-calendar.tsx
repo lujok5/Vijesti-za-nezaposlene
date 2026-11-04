@@ -31,12 +31,12 @@ function formattedDate(date: string) {
 
 export default function HolidayCalendar() {
   const today = todayUtc();
-  return <section id="kalendar" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="holiday-calendar-title">
+  return <section id="kalendar" className="min-w-0 scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7" aria-labelledby="holiday-calendar-title">
     <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Planiranje sljedeće pauze</p>
     <h2 id="holiday-calendar-title" className="mt-2 text-2xl font-black tracking-tight text-[#17243A] sm:text-3xl">Kalendar neradnih dana</h2>
     <div className="mt-5 grid gap-4 sm:grid-cols-2">{Object.entries(calendars).map(([code, calendar]) => {
       const upcoming = calendar.holidays.filter((holiday) => Date.parse(`${holiday.date}T00:00:00Z`) >= today).slice(0, 4);
-      return <article key={code} className="rounded-xl border border-slate-200 bg-[#F5F6F7] p-5"><h3 className="text-lg font-extrabold text-[#17243A]">{calendar.city} · {calendar.country}</h3>
+      return <article key={code} className="min-w-0 rounded-xl border border-slate-200 bg-[#F5F6F7] p-4 sm:p-5"><h3 className="text-lg font-extrabold text-[#17243A]">{calendar.city} · {calendar.country}</h3>
         {upcoming.length ? <ol className="mt-3 space-y-3">{upcoming.map((holiday) => <li key={holiday.date} className="flex items-start justify-between gap-3 border-t border-slate-200 pt-3"><span><span className="block text-sm font-bold text-[#17243A]">{holiday.name}</span><time className="mt-1 block text-xs text-slate-500">{formattedDate(holiday.date)}</time></span><span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-black text-red-700">{daysUntil(holiday.date)} d</span></li>)}</ol> : <p className="mt-3 text-sm text-slate-600">Nema upisanih budućih datuma.</p>}
         <a href={calendar.source} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-xs font-semibold text-slate-500 underline underline-offset-2 hover:text-[#17243A]">Službeni izvor ↗</a>
       </article>;

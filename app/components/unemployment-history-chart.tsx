@@ -15,7 +15,7 @@ const yearsToLabel = new Set([2004, 2008, 2012, 2016, 2020, 2024, 2026]);
 
 export default function UnemploymentHistoryChart() {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="employment-chart-title">
+    <section className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7" aria-labelledby="employment-chart-title">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Ekonomija · statistika</p>
@@ -24,8 +24,8 @@ export default function UnemploymentHistoryChart() {
         </div>
         <p className="text-right text-sm font-bold text-[#17243A]">2026. <span className="text-xl">{formatNumber(history.at(-1)!.total)}</span></p>
       </div>
-      <div className="mt-5 overflow-x-auto">
-        <svg className="h-auto min-w-[600px] w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="employment-chart-title employment-chart-description">
+      <div className="mt-5 w-full min-w-0">
+        <svg className="unemployment-chart block h-auto w-full max-w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="employment-chart-title employment-chart-description">
           <desc id="employment-chart-description">Linijski graf prosječnog broja nezaposlenih u Hrvatskoj od 2004. do 2026. godine.</desc>
           {[0, 100000, 200000, 300000].map((tick) => (
             <g key={tick}>
@@ -50,7 +50,7 @@ export default function UnemploymentHistoryChart() {
           {history.map((point) => <p key={point.year}>{point.year}: <span className="font-semibold">{formatNumber(point.total)}</span></p>)}
         </div>
       </details>
-      <p className="mt-4 text-xs leading-5 text-slate-500">Izvor: red „Ukupno” u priloženoj datoteci statistika.xls. Odgovarajuća serija HZZ-a prikazuje godišnji prosjek registriranih nezaposlenih; vrijednost za 2026. je dosad ostvareni prosjek. <a className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-[#17243A]" href="https://statistika.hzz.hr/Statistika.aspx?tipIzvjestaja=3%2C" target="_blank" rel="noopener noreferrer">HZZ Statistika On‑Line ↗</a></p>
+      <p className="mt-4 break-words text-xs leading-5 text-slate-500">Izvor: red „Ukupno” u priloženoj datoteci statistika.xls. Odgovarajuća serija HZZ-a prikazuje godišnji prosjek registriranih nezaposlenih; vrijednost za 2026. je dosad ostvareni prosjek. <a className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-[#17243A]" href="https://statistika.hzz.hr/Statistika.aspx?tipIzvjestaja=3%2C" target="_blank" rel="noopener noreferrer">HZZ Statistika On‑Line ↗</a></p>
     </section>
   );
 }

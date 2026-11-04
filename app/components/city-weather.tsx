@@ -55,7 +55,7 @@ async function getForecast(city: City): Promise<WeatherResult> {
 export default async function CityWeather() {
   const forecasts = await Promise.all(cities.map(getForecast));
   return (
-    <section className="rounded-2xl border border-slate-200 bg-[#F5F6F7] p-5 sm:p-7" aria-labelledby="weather-title">
+    <section className="min-w-0 rounded-2xl border border-slate-200 bg-[#F5F6F7] p-4 sm:p-7" aria-labelledby="weather-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Meteo za tražitelje posla</p>
@@ -65,7 +65,7 @@ export default async function CityWeather() {
       </div>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         {forecasts.map((forecast) => (
-          <article key={forecast.city} className="rounded-xl border border-slate-200 bg-white p-5">
+          <article key={forecast.city} className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-lg font-extrabold text-[#17243A]">{forecast.city}</h3>

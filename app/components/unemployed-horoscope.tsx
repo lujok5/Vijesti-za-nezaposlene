@@ -13,7 +13,7 @@ function dayKey() {
 
 export default function UnemployedHoroscope() {
   const today = dayKey();
-  return <section id="horoskop" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-[#F5F6F7] p-5 sm:p-7" aria-labelledby="horoscope-title">
+  return <section id="horoskop" className="min-w-0 scroll-mt-24 rounded-2xl border border-slate-200 bg-[#F5F6F7] p-4 sm:p-7" aria-labelledby="horoscope-title">
     <p className="text-xs font-black uppercase tracking-[0.2em] text-red-600">Dnevni pregled</p>
     <div className="mt-2 flex flex-wrap items-end justify-between gap-3"><h2 id="horoscope-title" className="text-2xl font-black tracking-tight text-[#17243A] sm:text-3xl">Horoskop nezaposlenih</h2><time className="text-sm font-semibold text-slate-500">{today}</time></div>
     <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{signs.map((sign) => {
