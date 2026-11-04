@@ -84,7 +84,7 @@ export default async function CityWeather() {
           </article>
         ))}
       </div>
-      <p className="mt-4 text-xs leading-5 text-slate-500">Stvarna prognoza vremena: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-[#17243A]">Open‑Meteo</a>. Satirični komentar je urednički dodatak; vrijeme ne predviđa zapošljavanje ni produktivnost.</p>
+      <p className="mt-4 text-xs leading-5 text-slate-500">Podaci o vremenu: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-[#17243A]">Open‑Meteo</a>.</p>
     </section>
   );
 }

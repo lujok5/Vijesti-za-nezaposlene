@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 
 type Story = { id: string; influencer: string; title: string; category: string; body: string; image_path: string | null; source_url: string | null; source_name: string | null; is_featured: boolean };
-const categories = ["Breaking News", "Digitalci", "Crna kronika", "Ekonomija", "Burza", "Lifestyle", "Ekskluzivno", "Satira"];
+const categories = ["Breaking News", "Digitalci", "Crna kronika", "Ekonomija", "Burza", "Lifestyle", "Ekskluzivno"];
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -186,7 +186,7 @@ export default function AdminPage() {
           <label className="block text-sm">Tekst vijesti<textarea required maxLength={10000} rows={7} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">TikTok poveznica (opcionalno)<input type="url" maxLength={2000} placeholder="https://www.tiktok.com/@korisnik/video/..." value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} className="mt-1 w-full rounded border p-2" /><span className="mt-1 block text-xs text-gray-500">Zalijepi poveznicu na video. Prepričaj događaj u tekstu vijesti; bot ne može automatski pročitati svaki TikTok video.</span></label>
           <label className="block text-sm">Opis ili transkript videa<textarea maxLength={6000} rows={4} value={context} onChange={(e) => setContext(e.target.value)} placeholder="Ako AI ne može otvoriti TikTok, ukratko napiši što se događa u videu." className="mt-1 w-full rounded border p-2" /></label>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={satire} onChange={(e) => setSatire(e.target.checked)} />Satira (AI će jasno označiti da je priča izmišljena)</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={satire} onChange={(e) => setSatire(e.target.checked)} />Humoristični ton</label>
           <button type="button" disabled={busy || (!tiktokUrl.trim() && !context.trim())} onClick={() => void makeDraft()} className="rounded border border-[#001F3F] px-5 py-3 font-bold text-[#001F3F]">{busy ? "Radim nacrt..." : "Napiši nacrt pomoću AI-ja"}</button>
           <label className="block text-sm">Slika (JPG, PNG, WebP ili GIF; do 5 MB)<input id="story-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => setImage(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm" /></label>
           <button disabled={busy} className="rounded bg-[#FF8C00] px-5 py-3 font-bold text-white">{busy ? "Spremam..." : editingId ? "Spremi promjene" : "Objavi vijest"}</button>

@@ -54,6 +54,7 @@ export async function loadNews(): Promise<Article[]> {
         .eq("published", true);
       if (!error) {
         let articles = (data ?? []) as Article[];
+        articles = articles.map((article) => article.category === "Satira" ? { ...article, category: "Ekskluzivno" } : article);
         const ids = articles.flatMap((article) => article.id ? [article.id] : []);
         if (ids.length) {
           const { data: sources, error: sourcesError } = await supabase.from("news_sources")
@@ -76,5 +77,5 @@ export async function loadNews(): Promise<Article[]> {
       // Keep the site available with the bundled news if Supabase is unavailable.
     }
   }
-  return url && key ? [] : loadLocalNews();
+  return url && key ? [] : loadLocalNews().map((article) => article.category === "Satira" ? { ...article, category: "Ekskluzivno" } : article);
 }
