@@ -20,8 +20,8 @@ export default async function Page() {
     body: item.body ?? item.tekst ?? "",
     category: item.category ?? item.kategorija ?? "",
   }));
-  const mediaItems = items.filter((item) => item.is_automated || item.source_name || item.source_url);
-  const editorialItems = items.filter((item) => !item.is_automated && !item.source_name && !item.source_url);
+  const mediaItems = items.filter((item) => item.is_automated === true);
+  const editorialItems = items.filter((item) => item.is_automated !== true);
   const featured: Article = editorialItems.find((item) => item.is_featured) ?? editorialItems[0] ?? {
     influencer: "Vijesti za nezaposlene",
     title: "Čekamo prve provjerene vijesti",
