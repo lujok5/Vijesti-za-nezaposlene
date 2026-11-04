@@ -52,6 +52,8 @@ export default async function Page() {
   for (const category of categories) {
     if (!fixedCategorySlugs.has(categorySlug(category))) navLinks.splice(3, 0, { label: category, href: `#rubrika-${categorySlug(category)}` });
   }
+  const primaryNavLabels = new Set(["Naslovnica", "Breaking News", "Najnovije", "Digitalci", "Statistika"]);
+  const primaryNavLinks = navLinks.filter((link) => primaryNavLabels.has(link.label));
   const creators = Array.from(new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo")));
   const firstByCategory = new Map<string, string>();
   for (const item of editorialItems) if (item.id && item.category && !firstByCategory.has(item.category)) firstByCategory.set(item.category, item.id);
@@ -81,15 +83,22 @@ export default async function Page() {
         </div>
       </section>
 
-      <nav aria-label="Rubrike" className="z-20 border-b border-slate-200 bg-white/95 backdrop-blur sm:sticky sm:top-0">
-        <details className="mobile-rubric-menu px-4 py-2 sm:hidden">
+      <nav aria-label="Rubrike" className="z-20 border-b border-slate-200 bg-white/95 backdrop-blur lg:sticky lg:top-0">
+        <details className="mobile-rubric-menu px-4 py-2 lg:hidden">
           <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-[#17243A]">Rubrike <span className="text-red-600">＋</span></summary>
           <div className="grid grid-cols-2 gap-2 pb-2 pt-3">
             {navLinks.map((link) => <a key={link.label} className={`rounded-lg border px-3 py-3 text-center text-xs font-bold uppercase tracking-wide ${link.active ? "border-red-600 bg-red-600 text-white" : "border-slate-200 bg-white text-[#17243A] hover:border-red-500"}`} href={link.href}>{link.label}</a>)}
           </div>
         </details>
-        <div className="mx-auto hidden max-w-[1440px] flex-wrap justify-center gap-2 px-6 py-3 sm:flex">
-          {navLinks.map((link) => <a key={link.label} className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${link.active ? "border-red-600 bg-red-600 text-white" : "border-slate-300 bg-white text-[#17243A] hover:border-red-500 hover:text-red-700"}`} href={link.href}>{link.label}</a>)}
+        <div className="mx-auto hidden max-w-[1440px] items-center justify-center gap-2 px-6 py-2 lg:flex">
+          {primaryNavLinks.map((link) => <a key={link.label} className={`shrink-0 rounded-full border px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors ${link.active ? "border-red-600 bg-red-600 text-white" : "border-slate-300 bg-white text-[#17243A] hover:border-red-500 hover:text-red-700"}`} href={link.href}>{link.label}</a>)}
+          <details className="desktop-sections-menu relative shrink-0">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-[#17243A] transition-colors hover:border-red-500 hover:text-red-700">Sve sekcije <span className="text-red-600">⌄</span></summary>
+            <div className="absolute right-0 top-full z-30 mt-2 w-[min(90vw,420px)] rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
+              <p className="mb-3 text-xs font-black uppercase tracking-widest text-slate-500">Odaberite rubriku</p>
+              <div className="grid grid-cols-2 gap-2">{navLinks.map((link) => <a key={link.label} className="rounded-lg border border-slate-100 px-3 py-2.5 text-xs font-bold text-[#17243A] transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700" href={link.href}>{link.label}</a>)}</div>
+            </div>
+          </details>
         </div>
       </nav>
 

@@ -11,6 +11,8 @@ body { width: 100%; min-width: 320px; background: #ffffff; font-family: Inter, M
 
 .mobile-rubric-menu > summary::-webkit-details-marker { display: none; }
 .mobile-rubric-menu[open] > summary span { transform: rotate(45deg); }
+.desktop-sections-menu > summary::-webkit-details-marker { display: none; }
+.desktop-sections-menu[open] > summary span { transform: rotate(180deg); }
 
 @media (max-width: 639px) {
   .unemployment-chart text { font-size: 20px; }
