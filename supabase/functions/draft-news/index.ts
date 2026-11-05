@@ -43,13 +43,13 @@ Deno.serve(async (request) => {
     } catch { return respond({ error: "Unesi valjanu HTTPS poveznicu na TikTok." }, 400); }
   }
 
-  const instructions = "Napiši urednički nacrt na hrvatskoj latinici. Vrati samo JSON objekt s poljima title, category, body. Odaberi category iz: Breaking News, Digitalci, Crna kronika, Ekonomija, Burza, Lifestyle, Ekskluzivno, Satira. Ako je satire=true, category mora biti 'Satira'; jasno označi priču kao izmišljenu i ne izmišljaj stvarne citate, optužbe ni događaje. Ako je satire=false, koristi samo činjenice iz predanog opisa/transkripta; poveznica sama nije dokaz sadržaja videa. Kad nema dovoljno podataka, predloži uredniku da zatraži dodatni opis. Predloži privlačan, ali činjeničan naslov do 180 znakova. Piši 2–4 sažeta odlomka i ne predstavljaj neprovjerene navode kao činjenice.";
+  const instructions = "Napiši urednički nacrt na hrvatskoj latinici prirodnim, razgovornim Gen Z tonom; duhovito i aktualno, ali bez forsiranog slenga, meme fraza i clickbaita. Vrati samo JSON objekt s poljima title, category, body. Odaberi category iz: Breaking News, Digitalci, Crna kronika, Ekonomija, Burza, Lifestyle, Ekskluzivno, Satira. Ako je satire=true, category mora biti 'Satira'; jasno označi priču kao izmišljenu i ne izmišljaj stvarne citate, optužbe ni događaje. Ako je satire=false, koristi samo činjenice iz predanog opisa/transkripta; poveznica sama nije dokaz sadržaja videa. Kad nema dovoljno podataka, predloži uredniku da zatraži dodatni opis. Predloži privlačan, ali činjeničan naslov do 180 znakova. Piši 2–4 sažeta odlomka i ne predstavljaj neprovjerene navode kao činjenice.";
   const userInput = "Return a json object with title, category, and body for this draft: " + JSON.stringify({ person, tiktokUrl: tiktokUrl || null, context: context || null, satire: Boolean(input.satire) });
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-mini",
       instructions,
       input: userInput,
       max_output_tokens: 900,
