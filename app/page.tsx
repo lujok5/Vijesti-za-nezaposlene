@@ -3,6 +3,7 @@ import UnemploymentHistoryChart from "./components/unemployment-history-chart";
 import SatiricalClassifieds from "./components/satirical-classifieds";
 import UnemployedHoroscope from "./components/unemployed-horoscope";
 import HolidayCalendar from "./components/holiday-calendar";
+import UnemploymentCalculator from "./components/unemployment-calculator";
 import { Article, categorySlug, formatDate, loadNews } from "./lib/news";
 
 function excerpt(text: string | undefined, limit: number) {
@@ -42,6 +43,7 @@ export default async function Page() {
     { label: "Ekonomija", href: "#statistika" },
     { label: "Burza", href: "/rubrika/burza" },
     { label: "Statistika", href: "#statistika" },
+    { label: "Kalkulator nerada", href: "#kalkulator-nerada" },
     { label: "Prognoza", href: "#prognoza" },
     { label: "Oglasnik", href: "#oglasnik" },
     { label: "Horoskop", href: "#horoskop" },
@@ -163,6 +165,7 @@ export default async function Page() {
           <p className="mt-4 text-xs text-slate-500">Pregled digitalaca povezanih s objavljenim pričama.</p>
         </section>
         <div id="statistika" className="min-w-0 scroll-mt-24"><UnemploymentHistoryChart /></div>
+        <UnemploymentCalculator />
         <div id="prognoza" className="scroll-mt-24"><CityWeather /></div>
         <SatiricalClassifieds />
         <UnemployedHoroscope />
