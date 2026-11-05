@@ -54,7 +54,7 @@ export default async function Page() {
   for (const category of categories) {
     if (!fixedCategorySlugs.has(categorySlug(category))) navLinks.splice(3, 0, { label: category, href: `#rubrika-${categorySlug(category)}` });
   }
-  const primaryNavLabels = new Set(["Naslovnica", "Breaking News", "Najnovije", "Digitalci", "Statistika"]);
+  const primaryNavLabels = new Set(["Naslovnica", "Breaking News", "Najnovije", "Digitalci", "Statistika", "Kalkulator nerada", "Generator izgovora"]);
   const primaryNavLinks = navLinks.filter((link) => primaryNavLabels.has(link.label));
   const creators = Array.from(new Set(items.map((item) => item.influencer).filter((name) => name && name !== "Uredništvo")));
   const firstByCategory = new Map<string, string>();
