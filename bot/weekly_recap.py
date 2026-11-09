@@ -29,9 +29,22 @@ def main():
     start = dt.datetime.combine(monday, dt.time.min, TZ).astimezone(dt.timezone.utc).isoformat()
     end = dt.datetime.combine(sunday + dt.timedelta(days=1), dt.time.min, TZ).astimezone(dt.timezone.utc).isoformat()
     title = f"Tjedni pregled: {monday:%d.%m.%Y.} – {sunday:%d.%m.%Y.}"
-    query = urllib.parse.urlencode({"select":"id,influencer,title,body,category,source_name,source_url,created_at", "published":"eq.true", "created_at":"gte."+start, "order":"created_at.asc", "limit":"1000"})
-    query += "&" + urllib.parse.urlencode({"created_at":"lt."+end})
-    rows = call(base + "/rest/v1/news?" + query, headers=auth) or []
+    fields = "id,influencer,title,body,category,source_name,source_url,created_at,published_at"
+    # Use the story's publication date so stories refreshed by the bot count
+    # in the week they appeared, even when their database row is older.
+    published_query = urllib.parse.urlencode({
+        "select": fields, "published": "eq.true", "published_at": "gte." + start,
+        "order": "published_at.asc", "limit": "1000",
+    }) + "&" + urllib.parse.urlencode({"published_at": "lt." + end})
+    rows = call(base + "/rest/v1/news?" + published_query, headers=auth) or []
+    # Keep manually entered legacy stories with no publication timestamp by
+    # falling back to their creation date, without duplicating dated stories.
+    fallback_query = urllib.parse.urlencode({
+        "select": fields, "published": "eq.true", "published_at": "is.null",
+        "created_at": "gte." + start, "order": "created_at.asc", "limit": "1000",
+    }) + "&" + urllib.parse.urlencode({"created_at": "lt." + end})
+    rows.extend(call(base + "/rest/v1/news?" + fallback_query, headers=auth) or [])
+    rows = list({row["id"]: row for row in rows}.values())
     if any(row.get("category") == "Tjedni pregled" and row.get("title") == title for row in rows):
         print("Tjedni pregled već postoji; preskačem duplikat.")
         return
