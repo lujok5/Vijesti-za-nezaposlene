@@ -35,12 +35,15 @@ Deno.serve(async (request) => {
   const tiktokUrl = String(input.tiktokUrl ?? "").trim().slice(0, 2000);
   const context = String(input.context ?? "").trim().slice(0, 6000);
   if (!person) return respond({ error: "Upiši osobu ili digitalca." }, 400);
-  if (!context && !tiktokUrl) return respond({ error: "Dodaj TikTok poveznicu ili kratak opis/transkript videa." }, 400);
+  if (!context && !tiktokUrl) return respond({ error: "Dodaj TikTok/Instagram poveznicu ili kratak opis/transkript videa." }, 400);
   if (tiktokUrl) {
     try {
       const parsed = new URL(tiktokUrl);
-      if (parsed.protocol !== "https:" || !["tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(parsed.hostname.toLowerCase())) throw new Error();
-    } catch { return respond({ error: "Unesi valjanu HTTPS poveznicu na TikTok." }, 400); }
+      const host = parsed.hostname.toLowerCase();
+      const isTikTok = ["tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(host);
+      const isInstagramReel = ["instagram.com", "www.instagram.com", "m.instagram.com"].includes(host) && /^\/reel\/[\w-]+\/?$/i.test(parsed.pathname);
+      if (parsed.protocol !== "https:" || (!isTikTok && !isInstagramReel)) throw new Error();
+    } catch { return respond({ error: "Unesi valjanu HTTPS poveznicu na TikTok video ili Instagram Reel." }, 400); }
   }
 
   const instructions = "Napiši urednički nacrt na hrvatskoj latinici prirodnim, razgovornim Gen Z tonom; duhovito i aktualno, ali bez forsiranog slenga, meme fraza i clickbaita. Vrati samo JSON objekt s poljima title, category, body. Odaberi category iz: Breaking News, Digitalci, Crna kronika, Ekonomija, Burza, Lifestyle, Ekskluzivno, Satira. Ako je satire=true, category mora biti 'Satira'; jasno označi priču kao izmišljenu i ne izmišljaj stvarne citate, optužbe ni događaje. Ako je satire=false, koristi samo činjenice iz predanog opisa/transkripta; poveznica sama nije dokaz sadržaja videa. Kad nema dovoljno podataka, predloži uredniku da zatraži dodatni opis. Predloži privlačan, ali činjeničan naslov do 180 znakova. Piši 2–4 sažeta odlomka i ne predstavljaj neprovjerene navode kao činjenice.";

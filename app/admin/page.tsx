@@ -89,13 +89,18 @@ export default function AdminPage() {
     setBusy(true); setMessage("");
     let path: string | null = null;
     try {
-      let validatedTikTokUrl: string | null = null;
+      let validatedMediaUrl: string | null = null;
+      let mediaSourceName: string | null = null;
       if (tiktokUrl.trim()) {
         const parsedUrl = new URL(tiktokUrl.trim());
-        if (parsedUrl.protocol !== "https:" || !["tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(parsedUrl.hostname.toLowerCase())) {
-          throw new Error("Unesi valjanu HTTPS poveznicu na TikTok video.");
+        const hostname = parsedUrl.hostname.toLowerCase();
+        const isTikTok = parsedUrl.protocol === "https:" && ["tiktok.com", "www.tiktok.com", "vm.tiktok.com", "vt.tiktok.com"].includes(hostname);
+        const isInstagramReel = parsedUrl.protocol === "https:" && ["instagram.com", "www.instagram.com", "m.instagram.com"].includes(hostname) && /^\/reel\/[\w-]+\/?$/i.test(parsedUrl.pathname);
+        if (!isTikTok && !isInstagramReel) {
+          throw new Error("Unesi valjanu HTTPS poveznicu na TikTok video ili Instagram Reel.");
         }
-        validatedTikTokUrl = parsedUrl.toString();
+        validatedMediaUrl = parsedUrl.toString();
+        mediaSourceName = isInstagramReel ? "Instagram" : "TikTok";
       }
       let imageUrl: string | null = null;
       if (image) {
@@ -110,7 +115,7 @@ export default function AdminPage() {
       }
       const article = { influencer: source.trim(), title: title.trim(),
         category: category.trim(), body: body.trim(), image_url: imageUrl, image_path: path,
-        source_name: validatedTikTokUrl ? "TikTok" : null, source_url: validatedTikTokUrl, published: true,
+        source_name: mediaSourceName, source_url: validatedMediaUrl, published: true,
       };
       const saved = editingId
         ? await db.from("news").update({ ...article, created_by: user.id, is_automated: false, ...(imageUrl ? {} : { image_url: undefined, image_path: undefined }) }).eq("id", editingId)
@@ -130,7 +135,7 @@ export default function AdminPage() {
 
   function edit(story: Story) {
     setEditingId(story.id); setSource(story.influencer); setTitle(story.title); setCategory(story.category);
-    setBody(story.body); setTiktokUrl(story.source_name === "TikTok" ? story.source_url ?? "" : "");
+    setBody(story.body); setTiktokUrl(story.source_name === "TikTok" || story.source_name === "Instagram" ? story.source_url ?? "" : "");
     setImage(null); setMessage("Uređuješ postojeću vijest. Dodaj sliku ili izmijeni tekst pa spremi promjene.");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -184,7 +189,7 @@ export default function AdminPage() {
           <label className="block text-sm">Naslov<input required maxLength={180} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
           <label className="block text-sm">Kategorija<select required value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded border p-2">{category && !categories.includes(category) && <option value={category}>{category}</option>}<option value="">Odaberi rubriku</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
           <label className="block text-sm">Tekst vijesti<textarea required maxLength={10000} rows={7} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
-          <label className="block text-sm">TikTok poveznica (opcionalno)<input type="url" maxLength={2000} placeholder="https://www.tiktok.com/@korisnik/video/..." value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} className="mt-1 w-full rounded border p-2" /><span className="mt-1 block text-xs text-gray-500">Zalijepi poveznicu na video. Prepričaj događaj u tekstu vijesti; bot ne može automatski pročitati svaki TikTok video.</span></label>
+          <label className="block text-sm">TikTok ili Instagram Reel poveznica (opcionalno)<input type="url" maxLength={2000} placeholder="TikTok ili https://www.instagram.com/reel/..." value={tiktokUrl} onChange={(e) => setTiktokUrl(e.target.value)} className="mt-1 w-full rounded border p-2" /><span className="mt-1 block text-xs text-gray-500">Zalijepi TikTok ili Instagram Reel poveznicu. Prepričaj događaj u tekstu vijesti; AI ne može automatski pročitati svaki video.</span></label>
           <label className="block text-sm">Opis ili transkript videa<textarea maxLength={6000} rows={4} value={context} onChange={(e) => setContext(e.target.value)} placeholder="Ako AI ne može otvoriti TikTok, ukratko napiši što se događa u videu." className="mt-1 w-full rounded border p-2" /></label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={satire} onChange={(e) => setSatire(e.target.checked)} />Humoristični ton</label>
           <button type="button" disabled={busy || (!tiktokUrl.trim() && !context.trim())} onClick={() => void makeDraft()} className="rounded border border-[#001F3F] px-5 py-3 font-bold text-[#001F3F]">{busy ? "Radim nacrt..." : "Napiši nacrt pomoću AI-ja"}</button>
